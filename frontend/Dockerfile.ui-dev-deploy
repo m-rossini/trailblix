@@ -1,0 +1,40 @@
+FROM node:latest
+
+# Install network utilities and eza
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    netcat-openbsd \
+    iputils-ping \
+    traceroute \
+    dnsutils \
+    net-tools \
+    telnet \
+    && curl https://sh.rustup.rs -sSf | sh -s -- -y \
+    && . $HOME/.cargo/env \
+    && cargo install eza
+
+# Set up eza aliases
+RUN echo "alias ls='eza'" >> /root/.bashrc \
+    && echo "alias ll='eza -l'" >> /root/.bashrc \
+    && echo "alias la='eza -la'" >> /root/.bashrc \
+    && echo "alias lt='eza --tree'" >> /root/.bashrc \
+    && echo "alias lta='eza -la --tree'" >> /root/.bashrc
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY ui/package.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application
+COPY ui/ .
+
+# Expose port 3000
+EXPOSE 3000
+
+# Start the application
+CMD ["npm", "start"]
