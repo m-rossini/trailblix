@@ -1,0 +1,20 @@
+# Use the official MongoDB image as the base image
+FROM mongo:latest
+
+# Install network diagnostics utilities and telnet
+RUN apt-get update && apt-get install -y \
+    iputils-ping \
+    telnet \
+    net-tools \
+    dnsutils \
+    traceroute \
+    curl \
+    wget \
+    netcat-openbsd \
+    && apt-get clean
+
+# Expose the default MongoDB port
+EXPOSE 27017
+
+# Start MongoDB
+CMD ["mongod"]
