@@ -1,41 +1,32 @@
 import React, { useState } from 'react';
+import { useAuth } from './AuthContext';
 
 const Login: React.FC = () => {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const { login } = useAuth();
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
-        // Add logic for submitting login credentials
-        // Example: Call API to authenticate user
+    const handleLogin = () => {
+        login(username, password);
+        // Add your login logic here
     };
 
     return (
         <div>
             <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Password:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                {error && <p>{error}</p>}
-                <button type="submit">Login</button>
-            </form>
+            <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter username"
+            />
+            <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+            />
+            <button onClick={handleLogin}>Login</button>
         </div>
     );
 };

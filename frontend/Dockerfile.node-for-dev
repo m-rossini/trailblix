@@ -21,10 +21,15 @@ RUN echo "alias ls='eza'" >> /root/.bashrc \
     && echo "alias lt='eza --tree'" >> /root/.bashrc \
     && echo "alias lta='eza -la --tree'" >> /root/.bashrc
 
+# Install TypeScript globally
+RUN npm install -g typescript
+
 # Set working directory
 WORKDIR /app
 
-COPY package.json .
+# Copy package.json
+COPY package.json ./
+
 # Install dependencies
 RUN npm install
 
@@ -33,7 +38,3 @@ COPY . .
 
 # Expose port 3000
 EXPOSE 3000
-
-# Start the application
-# CMD ["node", "npm", "start"]
-

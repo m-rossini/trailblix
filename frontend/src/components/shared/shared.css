@@ -1,0 +1,44 @@
+.common-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+    text-align: center;
+}
+
+.common-container h1, .common-container h2 {
+    margin-bottom: 10px;
+}
+
+.common-links {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    margin: 0;
+    justify-content: center;
+}
+
+.common-links li {
+    margin: 0 10px;
+}
+
+.common-links li a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.common-links li a:hover {
+    text-decoration: underline;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title {
+    margin: 0;
+}
+
+.footer-container {
+    text-align: center;
+}
