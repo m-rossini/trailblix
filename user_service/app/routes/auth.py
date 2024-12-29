@@ -1,31 +1,30 @@
-from flask import Blueprint, request, jsonify
-from ..models.user import User
+from flask import Blueprint, request, jsonify, current_app
+from werkzeug.security import generate_password_hash, check_password_hash
+from ..service.service_auth import login as s_login   
 
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/api/login', methods=['POST'])
 def login():
     data = request.json
     username = data.get('username')
     password = data.get('password')
     
-    user = User.query.filter_by(username=username).first()
-    
-    if user and user.verify_password(password):
-        return jsonify({'message': 'Login successful', 'user_id': user.id}), 200
-    return jsonify({'message': 'Invalid credentials'}), 401
+    msg, code = s_login(username, password)
 
-@auth_bp.route('/register', methods=['POST'])
+    return jsonify(msg), code
+
+@auth_bp.route('/api/signup', methods=['POST'])
 def register():
     data = request.json
     username = data.get('username')
     password = data.get('password')
     
-    if User.query.filter_by(username=username).first():
+    db = current_app.config['db']
+    if db.users.find_one({'username': username}):
         return jsonify({'message': 'User already exists'}), 400
     
-    new_user = User(username=username)
-    new_user.set_password(password)
-    new_user.save()
+    password_hash = generate_password_hash(password)
+    db.users.insert_one({'username': username, 'password_hash': password_hash})
     
     return jsonify({'message': 'User registered successfully'}), 201

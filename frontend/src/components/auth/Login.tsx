@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import Header from '../shared/Header';
-import Footer from '../shared/Footer';
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
     const { login } = useAuth();
 
-    const handleLogin = () => {
-        login(username, password);
-        // Add your login logic here
+    const handleLogin = async () => {
+        console.log('handleLogin called with:', username, password);
+        try {
+            await login(username, password);
+            console.log('Login successful');
+            setError(null); // Clear any previous error
+            // Add your login logic here, e.g., navigate to a different page
+        } catch (error) {
+            console.error('Login failed:', error);
+            setError('Login failed. Please check your username and password.');
+        }
     };
 
     return (
@@ -19,6 +26,7 @@ const Login: React.FC = () => {
             <main>
                 <div>
                     <h2>Login</h2>
+                    {error && <p style={{ color: 'red' }}>{error}</p>}
                     <input
                         type="text"
                         value={username}
