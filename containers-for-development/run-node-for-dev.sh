@@ -57,4 +57,4 @@ MOUNT_PATH="${PROJECT_ROOT}/frontend"
 
 echo -e "${YELLOW}Please ensure you are calling this script from the root of the module.${NC}"
 
-${PROJECT_ROOT}/containers-for-development/run-container-for-dev.sh --image-name "$IMAGE_NAME" --pod-name "$POD_NAME" --mount "$MOUNT_PATH" $REMOVE_EXISTING $REMOVE_FORCE "$@"
+${PROJECT_ROOT}/containers-for-development/run-container-for-dev.sh -i "$IMAGE_NAME" -p "$POD_NAME" -c 'node-coding-container' -m "$MOUNT_PATH" $REMOVE_EXISTING $REMOVE_FORCE "$@"
