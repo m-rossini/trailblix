@@ -1,31 +1,25 @@
-from flask import Blueprint, request, jsonify
-from ..models.user import User
+from flask import Blueprint, request, jsonify, current_app
+from ..service.service_auth import login as s_login 
+from ..service.service_auth import register as s_register     
 
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/api/login', methods=['POST'])
 def login():
     data = request.json
     username = data.get('username')
     password = data.get('password')
     
-    user = User.query.filter_by(username=username).first()
-    
-    if user and user.verify_password(password):
-        return jsonify({'message': 'Login successful', 'user_id': user.id}), 200
-    return jsonify({'message': 'Invalid credentials'}), 401
+    msg, code = s_login(username, password)
+    return jsonify(msg), code
 
-@auth_bp.route('/register', methods=['POST'])
+@auth_bp.route('/api/signup', methods=['POST'])
 def register():
     data = request.json
-    username = data.get('username')
+    username = data.get('email')
     password = data.get('password')
+    display_name = data.get('displayName')
+    birth_date = data.get('birthDate')
     
-    if User.query.filter_by(username=username).first():
-        return jsonify({'message': 'User already exists'}), 400
-    
-    new_user = User(username=username)
-    new_user.set_password(password)
-    new_user.save()
-    
-    return jsonify({'message': 'User registered successfully'}), 201
+    msg, code = s_register(username, password, display_name, birth_date)
+    return jsonify(msg), code

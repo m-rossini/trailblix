@@ -1,23 +1,28 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import Login from './components/auth/Login';
+import SignUp from './components/auth/SignUp';
 import CareerPath from './components/career/CareerPath';
+import Home from './components/home/Home';
 import Header from './components/shared/Header';
 import Footer from './components/shared/Footer';
+import { AuthProvider } from './components/auth/AuthContext';
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <AuthProvider>
       <Header />
       <main>
-        <Switch>
-          <Route path="/login" component={Login} />
-          <Route path="/career-path" component={CareerPath} />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/career" element={<CareerPath />} />
           {/* Add more routes as needed */}
-        </Switch>
+        </Routes>
       </main>
       <Footer />
-    </Router>
+    </AuthProvider>
   );
 };
 
