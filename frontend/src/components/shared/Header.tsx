@@ -1,25 +1,31 @@
 import React from 'react';
 import { useAuth } from '../auth/AuthContext';
+import { Link } from 'react-router-dom';
 import './shared.css';
 
 const Header: React.FC = () => {
     const { isLoggedIn, username, logout } = useAuth();
+
+    const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault();
+        logout();
+    };
 
     return (
         <header className="header-container common-container">
             <h1 className="header-title">TrailBlix</h1>
             <nav>
                 <ul className="common-links">
-                    <li><a href="/">Home</a></li>
+                    <li><Link to="/">Home</Link></li>
                     {isLoggedIn ? (
                         <>
-                            <li><span>{username}</span></li>
-                            <li><a href="/" onClick={logout}>Logoff</a></li>
+                            <li><span>Welcome, {username}</span></li>
+                            <li><Link to="/" onClick={handleLogout}>Logoff</Link></li>
                         </>
                     ) : (
-                        <li><a href="/login">Login</a></li>
+                        <li><Link to="/login">Login</Link></li>
                     )}
-                    <li><a href="/career">Career Paths</a></li>
+                    <li><Link to="/career">Career Paths</Link></li>
                 </ul>
             </nav>
         </header>

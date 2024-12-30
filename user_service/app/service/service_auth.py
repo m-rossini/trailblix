@@ -33,7 +33,7 @@ def register(username, password, display_name, birth_date):
         "password_hash": password_hash,
         "display_name": display_name,
         "birth_date": birth_date,
-        "insert_date": datetime.utcnow()
+        "insert_date": datetime.now(datetime.timezone.utc)
     })
     logger.info(f"User {username} registered successfully.")
     return "User registered successfully", 201
