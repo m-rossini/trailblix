@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 const Login: React.FC = () => {
@@ -7,14 +7,14 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const { login } = useAuth();
+    const navigate = useNavigate();
 
     const handleLogin = async () => {
-        console.log('handleLogin called with:', username, password);
         try {
             await login(username, password);
-            console.log('Login successful');
-            setError(null); // Clear any previous error
-            // Add your login logic here, e.g., navigate to a different page
+            console.log('Login successful. Username:', username);
+            setError(null); 
+            navigate('/'); 
         } catch (error) {
             console.error('Login failed:', error);
             setError('Login failed. Please check your username and password.');

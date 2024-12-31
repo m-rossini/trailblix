@@ -1,31 +1,44 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
     isLoggedIn: boolean;
     username: string;
+    displayName: string;
+    isAuthLoading: boolean;
     login: (username: string, password: string) => Promise<void>;
     signup: (email: string, password: string, displayName: string, birthDate: string) => Promise<void>;
-    logout: () => void;
+    logout: (redirectTo?: string) => void;
 }
 
-interface CustomError extends Error {
-    name: string;
-    message: string;
+interface AuthProviderProps {
+    children: ReactNode;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }: { children: ReactNode }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [username, setUsername] = useState<string>('User');
+    const [displayName, setDisplayName] = useState<string>('User');
+    const [isAuthLoading] = useState<boolean>(true);
     const navigate = useNavigate();
 
-    const login = async (username: string, password: string): Promise<void> => {
-        console.log('login function called with:', username, password);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
+    useEffect(() => {
+        const data = sessionStorage.getItem('userData');
+        if (data) {
+            try {
+                const parsedData = JSON.parse(data);
+                setIsLoggedIn(true);
+                setUsername(parsedData.username); // Replace with actual username from token validation
+                setDisplayName(parsedData.displayName); // Replace with actual display name from token validation
+            } catch (error) {
+                console.error('Failed to parse auth token:', error);
+            }
+        }
+    }, []);
 
+    const login = async (username: string, password: string): Promise<void> => {
         try {
             const response = await fetch('http://localhost:5000/api/login', {
                 method: 'POST',
@@ -33,37 +46,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }: { 
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ username, password }),
-                signal: controller.signal,
             });
-            clearTimeout(timeoutId);
 
-            console.log('response:', response);
             if (!response.ok) {
                 throw new Error('Invalid credentials');
             }
 
-            const data = await response.json();
-            console.log('data:', data);
-            localStorage.setItem('authToken', data.token);
+            const result = await response.json();
+            const data = result.data;
+            const jsonData = JSON.stringify(data);
+            sessionStorage.setItem('userData', jsonData);
             setIsLoggedIn(true);
-            setUsername(username);
-            navigate('/'); // Navigate to home or another page after login
+            setUsername(data.username);
+            setDisplayName(data.display_name);
         } catch (error) {
-            const typedError = error as CustomError;
-            if (typedError.name === 'AbortError') {
-                console.error('Login request timed out');
-                throw new Error('Login request timed out');
-            } else {
-                console.error('Login error:', typedError);
-                throw typedError;
-            }
+            console.error('Login error:', error);
+            throw error;
         }
     };
 
     const signup = async (email: string, password: string, displayName: string, birthDate: string): Promise<void> => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
-
         try {
             const response = await fetch('http://localhost:5000/api/signup', {
                 method: 'POST',
@@ -71,40 +73,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }: { 
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email, password, displayName, birthDate }),
-                signal: controller.signal,
             });
-            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 throw new Error('Failed to sign up');
             }
 
-            const data = await response.json();
-            localStorage.setItem('authToken', data.token);
+            const result = await response.json();
+            const data = result.data;
+            localStorage.setItem('data', JSON.stringify(data));
             setIsLoggedIn(true);
-            setUsername(displayName);
-            navigate('/login'); 
+            setUsername(data.username);
+            setDisplayName(data.display_name);
         } catch (error) {
-            const typedError = error as CustomError;
-            if (typedError.name === 'AbortError') {
-                console.error('Signup request timed out');
-                throw new Error('Signup request timed out');
-            } else {
-                console.error('Signup error:', typedError);
-                throw typedError;
-            }
+            console.error('Signup error:', error);
+            throw error;
         }
     };
 
-    const logout = (): void => {
-        localStorage.removeItem('authToken');
+    const logout = (redirectTo?: string): void => {
+        console.info(`Logging out. User: ${username}`);
+        sessionStorage.removeItem('userData');
         setIsLoggedIn(false);
         setUsername('User');
-        navigate('/login');
+        setDisplayName('User');
+        if (redirectTo) {
+            navigate(redirectTo);
+        }
     };
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, username, login, signup, logout }}>
+        <AuthContext.Provider value={{ isLoggedIn, username, displayName, isAuthLoading, login, signup, logout }}>
             {children}
         </AuthContext.Provider>
     );

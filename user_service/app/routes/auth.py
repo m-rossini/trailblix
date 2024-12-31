@@ -10,8 +10,12 @@ def login():
     username = data.get('username')
     password = data.get('password')
     
-    msg, code = s_login(username, password)
-    return jsonify(msg), code
+    msg, code, to_return = s_login(username, password)
+    response = {
+        "message": msg,
+        "data": to_return
+    }
+    return jsonify(response), code
 
 @auth_bp.route('/api/signup', methods=['POST'])
 def register():
@@ -21,5 +25,9 @@ def register():
     display_name = data.get('displayName')
     birth_date = data.get('birthDate')
     
-    msg, code = s_register(username, password, display_name, birth_date)
-    return jsonify(msg), code
+    msg, code, to_return = s_register(username, password, display_name, birth_date)
+    response = {
+        "message": msg,
+        "data": to_return
+    }
+    return jsonify(response), code
