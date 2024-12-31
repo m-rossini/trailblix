@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import Header from '../shared/Header';
-import Footer from '../shared/Footer';
 
 const SignUp: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -11,8 +9,14 @@ const SignUp: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [birthDate, setBirthDate] = useState('');
     const [error, setError] = useState('');
-    const { signup } = useAuth();
+    const { signup, logout, isLoggedIn, username } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        console.log(`User is logged in: ${isLoggedIn}`);
+        console.log(`Logged in user: ${username}`);
+        logout(); 
+    }, [logout, isLoggedIn, username]);
 
     const handleSignUp = async () => {
         if (password !== confirmPassword) {
@@ -49,6 +53,7 @@ const SignUp: React.FC = () => {
                 <div>
                     <h2>Sign Up</h2>
                     {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {isLoggedIn && <p>Logged in as: {username}</p>}
                     <div>
                         <label htmlFor="email">Email:</label>
                         <input

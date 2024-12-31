@@ -13,7 +13,7 @@ def setup_mongodb():
     db = client["user_management"]
     
     users_collection = db["users"]
-    users_collection.create_index([("email", ASCENDING)], unique=True)
+    users_collection.create_index([("username", ASCENDING)], unique=True)
     logger.info("Created unique index on email field for users")
 
     news_collection = db["newsletter"]

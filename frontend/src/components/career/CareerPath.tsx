@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 
 const CareerPath: React.FC = () => {
     const [careerPaths, setCareerPaths] = useState<any[]>([]);
+    const { isLoggedIn } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchCareerPaths = async () => {
@@ -15,11 +19,12 @@ const CareerPath: React.FC = () => {
         };
 
         fetchCareerPaths();
-    }, []);
+    }, [isLoggedIn, navigate]);
 
     return (
         <div>
             <h1>Career Paths</h1>
+            <p style={{ color: 'green' }}>This is the Career Path Page</p>
             <ul>
                 {careerPaths.map((path) => (
                     <li key={path.id}>{path.name}</li>

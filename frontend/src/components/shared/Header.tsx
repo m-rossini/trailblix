@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 import './shared.css';
 
 const Header: React.FC = () => {
-    const { isLoggedIn, username, logout } = useAuth();
+    const { isLoggedIn, displayName, logout } = useAuth();
 
     const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
-        logout();
+        logout('/login');
     };
 
     return (
@@ -19,13 +19,13 @@ const Header: React.FC = () => {
                     <li><Link to="/">Home</Link></li>
                     {isLoggedIn ? (
                         <>
-                            <li><span>Welcome, {username}</span></li>
+                            <li><span>Welcome, {displayName}</span></li>
                             <li><Link to="/" onClick={handleLogout}>Logoff</Link></li>
+                            <li><Link to="/career">Career Paths</Link></li>
                         </>
                     ) : (
                         <li><Link to="/login">Login</Link></li>
                     )}
-                    <li><Link to="/career">Career Paths</Link></li>
                 </ul>
             </nav>
         </header>
