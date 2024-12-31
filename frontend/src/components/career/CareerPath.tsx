@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
 const CareerPath: React.FC = () => {
-    const [careerPaths, setCareerPaths] = useState<any[]>([]);
     const { isLoggedIn } = useAuth();
     const navigate = useNavigate();
     const [cvFile, setCvFile] = useState<File | null>(null);
-    const [url, setUrl] = useState<string>('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -17,85 +16,100 @@ const CareerPath: React.FC = () => {
     }, [isLoggedIn, navigate]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setCvFile(e.target.files[0]);
+        const file = e.target.files?.[0];
+        if (file && (
+            file.type === 'application/pdf' ||
+            file.type === 'text/plain' ||
+            file.type === 'application/msword' ||
+            file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+            file.type === 'application/rtf'
+        )) {
+            setCvFile(file);
+        } else {
+            alert('Please upload a PDF, text, rich text, or Word document.');
         }
     };
 
-    const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setUrl(e.target.value);
-    };
-
-    const handleUploadClick = async () => {
+    const handleUploadClick = () => {
         const formData = new FormData();
         if (cvFile) {
             formData.append('cvFile', cvFile);
         }
-        formData.append('googleDocsUrl', url);
 
-        try {
-            const response = await fetch('/api/upload-cv', {
-                method: 'POST',
-                body: formData,
-            });
-
+        fetch('http://localhost:5001/api/upload-cv', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to upload CV');
             }
-
-            const data = await response.json();
+            return response.json();
+        })
+        .then(data => {
             console.info('CV upload successful:', data);
-        } catch (error) {
+        })
+        .catch(error => {
             console.error('Error uploading CV:', error);
+        });
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (file.type === 'application/pdf' ||
+                file.type === 'text/plain' ||
+                file.type === 'application/msword' ||
+                file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                file.type === 'application/rtf') {
+                setCvFile(file);
+            } else {
+                alert('Please upload a PDF, text, rich text, or Word document.');
+            }
+            e.dataTransfer.clearData();
         }
     };
 
-    const handlePagesClick = async () => {
-        try {
-            const response = await fetch('/api/upload-cv', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ linkedinUrl: url }),
-            });
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+    };
 
-            if (!response.ok) {
-                throw new Error('Failed to upload LinkedIn URL');
-            }
-
-            const data = await response.json();
-            console.info('LinkedIn URL upload successful:', data);
-        } catch (error) {
-            console.error('Error uploading LinkedIn URL:', error);
-        }
+    const handleBrowseClick = () => {
+        fileInputRef.current?.click();
     };
 
     return (
         <div>
             <h1>Career Paths</h1>
             <p style={{ color: 'green' }}>This is the Career Path Page</p>
-            <ul>
-                {careerPaths.map((path) => (
-                    <li key={path.id}>{path.name}</li>
-                ))}
-            </ul>
             <h2>Upload Your CV</h2>
-            <div>
-                <label htmlFor="url">URL:</label>
+            <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                style={{
+                    border: '2px dashed #ccc',
+                    padding: '20px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                }}
+                onClick={handleBrowseClick}
+            >
+                {cvFile ? (
+                    <p>{cvFile.name}</p>
+                ) : (
+                    <p>Drop here or browse local files (PDF, text, rich text, or Word documents)</p>
+                )}
                 <input
-                    type="url"
-                    id="url"
-                    value={url}
-                    onChange={handleUrlChange}
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept=".pdf,.txt,.rtf,.doc,.docx" // Accept PDF, text, rich text, and Word documents
+                    style={{ display: 'none' }}
                 />
             </div>
             <div>
-                <button type="button" onClick={handleUploadClick}>Upload from Device/Google Docs</button>
-                <input type="file" id="cvFile" onChange={handleFileChange} style={{ display: 'none' }} />
-            </div>
-            <div>
-                <button type="button" onClick={handlePagesClick}>Upload LinkedIn URL</button>
+                <button type="button" onClick={handleUploadClick}>Upload CV</button>
             </div>
         </div>
     );
