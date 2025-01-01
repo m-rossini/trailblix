@@ -10,6 +10,7 @@ PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$(pwd)")
 # Function to create a pod if it doesn't exist
 create_pod() {
   local POD_NAME=$1
+  local PORTS=$2
   if ! podman pod exists "$POD_NAME"; then
     echo -e "${YELLOW}Creating pod $POD_NAME...${NC}"
     ${PROJECT_ROOT}/deploy/create-pod.sh -e podman \
@@ -17,6 +18,8 @@ create_pod() {
       -hn "${POD_NAME}-host" \
       -m 4G \
       -net marcos-net \
+      -p 5000:5000 \
+      -p 5001:5001 \
       -re
     echo -e "${GREEN}Pod $POD_NAME created successfully.${NC}"
   else

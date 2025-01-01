@@ -6,15 +6,13 @@ import os
 from pymongo import MongoClient, ASCENDING
 
 def parse_args():
-    # Set up argument parser
     parser = argparse.ArgumentParser(description='Run the Flask application.')
     parser.add_argument('-H', '--host', default=os.getenv('HOST', 'localhost'), help='Host to run the application on (default: localhost)')
-    parser.add_argument('-P', '--port', type=int, default=int(os.getenv('PORT', 5000)), help='Port to run the application on (default: 5000)')
+    parser.add_argument('-P', '--port', type=int, default=int(os.getenv('PORT', 5001)), help='Port to run the application on (default: 5001)')
     parser.add_argument('-L', '--loglevel', default=os.getenv('LOGLEVEL', 'info'), help='Logging level (default: info)')
     return parser.parse_args()
 
 def setup_logging(loglevel):
-    # Configure logging
     logging.basicConfig(level=getattr(logging, loglevel.upper()))
     logger = logging.getLogger(__name__)
     return logger

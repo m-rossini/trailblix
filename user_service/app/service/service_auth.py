@@ -2,7 +2,6 @@ import logging
 from flask import current_app
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
-from bson import ObjectId
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
 const CareerPath: React.FC = () => {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, username } = useAuth(); // Access username from AuthContext
     const navigate = useNavigate();
     const [cvFile, setCvFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,6 +35,7 @@ const CareerPath: React.FC = () => {
         if (cvFile) {
             formData.append('cvFile', cvFile);
         }
+        formData.append('username', username); // Append the username
 
         fetch('http://localhost:5001/api/upload-cv', {
             method: 'POST',
@@ -93,7 +94,7 @@ const CareerPath: React.FC = () => {
                     textAlign: 'center',
                     cursor: 'pointer',
                 }}
-                onClick={handleBrowseClick}
+                onClick={handleBrowseClick} // Clicking this div opens the file dialog
             >
                 {cvFile ? (
                     <p>{cvFile.name}</p>
@@ -104,8 +105,8 @@ const CareerPath: React.FC = () => {
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    accept=".pdf,.txt,.rtf,.doc,.docx" // Accept PDF, text, rich text, and Word documents
-                    style={{ display: 'none' }}
+                    accept=".pdf,.txt,.rtf,.doc,.docx" // Accept only specific file types
+                    style={{ display: 'none' }} // Hidden file input
                 />
             </div>
             <div>

@@ -3,48 +3,47 @@ from flask_cors import CORS
 import os
 import logging
 from pymongo import MongoClient, ASCENDING
+import argparse
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
-def setup_mongodb():
-    client = MongoClient("mongodb://mongo-dev-pod-host:27017/")
-    db = client["user_management"]
-    
-    users_collection = db["users"]
-    users_collection.create_index([("username", ASCENDING)], unique=True)
-    logger.info("Created unique index on username field for users")
-
-    news_collection = db["newsletter"]
-    news_collection.create_index([("email", ASCENDING)], unique=True)
-    logger.info("Created unique index on email field for newsletter")
-
-    return db
-
-def create_app():
+def create_app(log_level='INFO'):
     app = Flask(__name__)
     
     app.config.from_object('config.Config')
 
-    app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017/user_management')
     app.config['FLASK_ENV'] = os.getenv('FLASK_ENV', 'development')
 
     # Enable CORS for all origins
     CORS(app, resources={r"/*": {"origins": "*"}})
 
-    db = setup_mongodb()
-    app.config['db'] = db
+    # Configure logging level
+    logging.basicConfig(level=getattr(logging, log_level.upper(), logging.INFO))
+    logger.setLevel(getattr(logging, log_level.upper(), logging.INFO))
+    logger.info(f"Logging level set to {log_level.upper()}")
 
-    from .routes.auth import auth_bp
-    app.register_blueprint(auth_bp)
+    from .routes.file_management import file_management
+    app.register_blueprint(file_management)
 
     from .routes.general import general
     app.register_blueprint(general)
     
     return app
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Run the Flask app.')
+    parser.add_argument('--host', type=str, default='0.0.0.0', help='Host to run the app on')
+    parser.add_argument('--port', type=int, default=5001, help='Port to run the app on')
+    parser.add_argument('--log-level', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='Set the logging level')
+    return parser.parse_args()
+
+# Create a default app instance for 'flask run'
 app = create_app()
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == '__main__':
+    args = parse_args()
+    app = create_app(args.log_level)
+    debug_mode = args.log_level.upper() == 'DEBUG'
+    app.run(host=args.host, port=args.port, debug=debug_mode)

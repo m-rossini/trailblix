@@ -6,4 +6,4 @@ general = Blueprint('general', __name__)
 def root_url():
     data = request.json
     
-    return jsonify({'message': 'Welcome. Up and Running'}), 200
+    return jsonify({'message': 'Welcome User Services. Up and Running'}), 200
