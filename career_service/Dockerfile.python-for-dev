@@ -1,7 +1,6 @@
-# Use an official Python runtime as a parent image
 FROM python:3.13-slim
 
-# Install network diagnostics utilities
+# Install network diagnostics utilities and git
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
@@ -11,23 +10,27 @@ RUN apt-get update && apt-get install -y \
     dnsutils \
     net-tools \
     telnet \
+    git \
     && apt-get clean
 
 # Set the working directory
 WORKDIR /app
 
 # Copy the requirements file
-COPY src/requirements.txt .
+COPY requirements.txt .
 
 # Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
-# This step will always be executed with the latest changes
-COPY src/ .
+COPY . .
 
 # Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 5001
 
+# Set the environment variables
+ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
-CMD ["python", "dispatch.py", "--debug",  "--port=5000", "--host=0.0.0.0"]
+
+# Start a shell to keep the container running
+CMD ["bash"]

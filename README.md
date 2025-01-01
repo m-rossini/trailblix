@@ -25,16 +25,12 @@ career-path-app
 │   ├── app
 │   │   ├── routes
 │   │   │   └── auth.py
-│   │   ├── models
-│   │   │   └── user.py
 │   │   └── __init__.py
 │   ├── requirements.txt
 │   └── config.py
 ├── career_service
 │   ├── app
 │   │   ├── routes
-│   │   │   └── career.py
-│   │   ├── models
 │   │   │   └── career.py
 │   │   └── __init__.py
 │   ├── requirements.txt
