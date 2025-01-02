@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
-from ..service.service_auth import login as s_login 
-from ..service.service_auth import register as s_register     
+from service.service_auth import login as s_login 
+from service.service_auth import register as s_register     
 
 auth_bp = Blueprint('auth', __name__)
 

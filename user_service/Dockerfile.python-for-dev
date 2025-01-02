@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     dnsutils \
     net-tools \
     telnet \
+    git \
     && apt-get clean
 
 # Set the working directory
