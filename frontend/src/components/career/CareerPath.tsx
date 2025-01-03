@@ -2,95 +2,73 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
-const CareerPath: React.FC = () => {
-    const { isLoggedIn, username } = useAuth(); // Access username from AuthContext
-    const navigate = useNavigate();
-    const [cvFile, setCvFile] = useState<File | null>(null);
+/**
+ * Reusable UploadArea component.
+ */
+interface UploadAreaProps {
+    file: File | null;
+    onFileChange: (file: File) => void;
+    onUploadClick: () => void;
+    stage: string;
+}
+
+const UploadArea: React.FC<UploadAreaProps> = ({
+    file,
+    onFileChange,
+    onUploadClick,
+    stage,
+}) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-        if (!isLoggedIn) {
-            navigate('/login');
-            return;
-        }
-    }, [isLoggedIn, navigate]);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file && (
-            file.type === 'application/pdf' ||
-            file.type === 'text/plain' ||
-            file.type === 'application/msword' ||
-            file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-            file.type === 'application/rtf'
-        )) {
-            setCvFile(file);
-        } else {
-            alert('Please upload a PDF, text, rich text, or Word document.');
+    /**
+     * Handle file selection via input dialog.
+     * @param e - Change event from file input
+     */
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0];
+        if (selectedFile) {
+            onFileChange(selectedFile);
         }
     };
 
-    const handleUploadClick = () => {
-        if (!cvFile) {
-            alert('No file selected for upload.');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('cvFile', cvFile);
-        formData.append('username', username); 
-        formData.append('stage', 'current');
-
-        fetch('http://localhost:5001/api/upload-cv', {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to upload CV');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.info('CV upload successful:', data);
-        })
-        .catch(error => {
-            console.error('Error uploading CV:', error);
-        });
-    };
-
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            const file = e.dataTransfer.files[0];
-            if (
-                file.type === 'application/pdf' ||
-                file.type === 'text/plain' ||
-                file.type === 'application/msword' ||
-                file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-                file.type === 'application/rtf'
-            ) {
-                setCvFile(file);
-            } else {
-                alert('Please upload a PDF, text, rich text, or Word document.');
-            }
-            e.dataTransfer.clearData();
-        }
-    };
-
+    /**
+     * Handle drag over event to allow dropping.
+     * @param e - Drag event
+     */
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
     };
 
-    const handleBrowseClick = () => {
-        fileInputRef.current?.click(); 
+    /**
+     * Handle drop event to capture the file.
+     * @param e - Drag event
+     */
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+            const droppedFile = files[0];
+            onFileChange(droppedFile);
+            e.dataTransfer.clearData();
+        }
     };
+
+    /**
+     * Trigger the hidden file input dialog.
+     */
+    const handleBrowseClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    /**
+     * Utility function to capitalize the first letter.
+     * @param word - string to capitalize
+     * @returns capitalized string
+     */
+    const capitalize = (word: string): string => word.charAt(0).toUpperCase() + word.slice(1);
 
     return (
         <div>
-            <h1>Career Paths</h1>
-            <p style={{ color: 'green' }}>This is the Career Path Page</p>
-            <h2>Upload Your CV</h2>
             <div
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -99,18 +77,22 @@ const CareerPath: React.FC = () => {
                     padding: '20px',
                     textAlign: 'center',
                     cursor: 'pointer',
+                    marginBottom: '10px',
                 }}
                 onClick={handleBrowseClick} // Clicking this div opens the file dialog
             >
-                {cvFile ? (
-                    <p>{cvFile.name}</p>
+                {file ? (
+                    <p>{file.name}</p>
                 ) : (
-                    <p>Drop here or browse local files (PDF, text, rich text, or Word documents)</p>
+                    <p>
+                        Drop here or browse local files{' '}
+                        (PDF, text, rich text, or Word documents)
+                    </p>
                 )}
                 <input
                     type="file"
                     ref={fileInputRef}
-                    onChange={handleFileChange}
+                    onChange={handleFileInputChange}
                     accept=".pdf,.txt,.rtf,.doc,.docx" // Accept only specific file types
                     style={{ display: 'none' }} // Hidden file input
                 />
@@ -118,12 +100,129 @@ const CareerPath: React.FC = () => {
             <div>
                 <button
                     type="button"
-                    onClick={handleUploadClick}
-                    disabled={!cvFile} // Disable button if no file is selected
+                    onClick={onUploadClick}
+                    disabled={!file} // Disable button if no file is selected
                 >
-                    Upload CV
+                    Upload {capitalize(stage)} CV
                 </button>
             </div>
+        </div>
+    );
+};
+
+const CareerPath: React.FC = () => {
+    const { isLoggedIn, username } = useAuth(); // Access username from AuthContext
+    const navigate = useNavigate();
+
+    // Unified state for both current and future CV files
+    const [cvFiles, setCvFiles] = useState<{ [key: string]: File | null }>({
+        current: null,
+        future: null,
+    });
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            navigate('/login');
+            return;
+        }
+    }, [isLoggedIn, navigate]);
+
+    /**
+     * Generic handler for file selection.
+     * @param stage - "current" or "future"
+     * @param file - selected file
+     */
+    const handleFileChange = (stage: 'current' | 'future') => (file: File) => {
+        if (isValidFileType(file.type)) {
+            setCvFiles(prev => ({ ...prev, [stage]: file }));
+        } else {
+            alert(`Please upload a PDF, text, rich text, or Word document for your ${stage} CV.`);
+        }
+    };
+
+    /**
+     * Generic handler for upload button click.
+     * @param stage - "current" or "future"
+     */
+    const handleUploadClick = (stage: 'current' | 'future') => () => {
+        const file = cvFiles[stage];
+        if (!file) {
+            alert(`No ${stage} CV file selected for upload.`);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('cvFile', file);
+        formData.append('username', username);
+        formData.append('stage', stage);
+
+        fetch('http://localhost:5001/api/upload-cv', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to upload ${stage} CV`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.info(`${capitalize(stage)} CV upload successful:`, data);
+                alert(`${capitalize(stage)} CV uploaded successfully!`);
+                // Optionally, reset the file input
+                setCvFiles(prev => ({ ...prev, [stage]: null }));
+            })
+            .catch(error => {
+                console.error(`Error uploading ${stage} CV:`, error);
+                alert(`Error uploading ${stage} CV: ${error.message}`);
+            });
+    };
+
+    /**
+     * Utility function to validate file types.
+     * @param fileType - MIME type of the file
+     * @returns boolean indicating if the file type is valid
+     */
+    const isValidFileType = (fileType: string): boolean => {
+        const validTypes = [
+            'application/pdf',
+            'text/plain',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/rtf',
+        ];
+        return validTypes.includes(fileType);
+    };
+
+    /**
+     * Utility function to capitalize the first letter.
+     * @param word - string to capitalize
+     * @returns capitalized string
+     */
+    const capitalize = (word: string): string => word.charAt(0).toUpperCase() + word.slice(1);
+
+    return (
+        <div>
+            <h1>Career Paths</h1>
+            <p style={{ color: 'green' }}>This is the Career Path Page</p>
+
+            {/* Current CV Upload Section */}
+            <h2>Upload Your Current CV</h2>
+            <UploadArea
+                file={cvFiles.current}
+                onFileChange={handleFileChange('current')}
+                onUploadClick={handleUploadClick('current')}
+                stage="current"
+            />
+
+            {/* Future CV Upload Section */}
+            <h2>Upload Your Future CV</h2>
+            <UploadArea
+                file={cvFiles.future}
+                onFileChange={handleFileChange('future')}
+                onUploadClick={handleUploadClick('future')}
+                stage="future"
+            />
         </div>
     );
 };
