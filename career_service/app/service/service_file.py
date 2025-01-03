@@ -22,13 +22,14 @@ def __ensure_dir_exists(path):
 
 def upload(username, cv_file):
     if cv_file and username:
-        filename = secure_filename(cv_file.filename)
-        upload_folder = current_app.config['UPLOAD_FOLDER']
+        sec_filename = secure_filename(cv_file.filename)
+        sec_username = secure_filename(username)
+        upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], sec_username)
         logger.info(f">>>Upload folder: {upload_folder}")
         __ensure_dir_exists(upload_folder)
-        save_path = os.path.join(upload_folder, filename)
+        save_path = os.path.join(upload_folder, sec_filename)
         cv_file.save(save_path)
-        logger.info(f'User: {username} uploaded CV: {filename}')  # Debug statement
+        logger.info(f'User: {username} uploaded CV: {sec_filename}')  # Debug statement
         return 'File uploaded successfully', 200, None
 
     return "Missing user name of file", 400, None

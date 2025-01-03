@@ -31,10 +31,13 @@ const CareerPath: React.FC = () => {
     };
 
     const handleUploadClick = () => {
-        const formData = new FormData();
-        if (cvFile) {
-            formData.append('cvFile', cvFile);
+        if (!cvFile) {
+            alert('No file selected for upload.');
+            return;
         }
+
+        const formData = new FormData();
+        formData.append('cvFile', cvFile);
         formData.append('username', username); // Append the username
 
         fetch('http://localhost:5001/api/upload-cv', {
@@ -59,11 +62,13 @@ const CareerPath: React.FC = () => {
         e.preventDefault();
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0];
-            if (file.type === 'application/pdf' ||
+            if (
+                file.type === 'application/pdf' ||
                 file.type === 'text/plain' ||
                 file.type === 'application/msword' ||
                 file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-                file.type === 'application/rtf') {
+                file.type === 'application/rtf'
+            ) {
                 setCvFile(file);
             } else {
                 alert('Please upload a PDF, text, rich text, or Word document.');
@@ -77,7 +82,7 @@ const CareerPath: React.FC = () => {
     };
 
     const handleBrowseClick = () => {
-        fileInputRef.current?.click();
+        fileInputRef.current?.click(); 
     };
 
     return (
@@ -110,7 +115,13 @@ const CareerPath: React.FC = () => {
                 />
             </div>
             <div>
-                <button type="button" onClick={handleUploadClick}>Upload CV</button>
+                <button
+                    type="button"
+                    onClick={handleUploadClick}
+                    disabled={!cvFile} // Disable button if no file is selected
+                >
+                    Upload CV
+                </button>
             </div>
         </div>
     );
