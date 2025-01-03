@@ -5,7 +5,6 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 def __ensure_dir_exists(path):
     logger.info(f">>>Ensuring directory exists: {path}")
@@ -27,12 +26,11 @@ def upload(username, stage, cv_file):
         sec_stage = secure_filename(stage)
 
         upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], sec_username, sec_stage)
-        logger.info(f">>>Upload folder: {upload_folder}")
         __ensure_dir_exists(upload_folder)
         save_path = os.path.join(upload_folder, sec_filename)
         cv_file.save(save_path)
         logger.info(f'User: {username} uploaded CV: {sec_filename}')  # Debug statement
         return 'File uploaded successfully', 200, None
 
-    return "Missing user name of file", 400, None
+    return "Missing user name or file", 400, None
 

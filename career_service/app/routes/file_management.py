@@ -5,7 +5,6 @@ from werkzeug.utils import secure_filename
 from service.service_file import upload as s_upload
 
 # Configure logger
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 fm_bp = Blueprint('upload', __name__)
