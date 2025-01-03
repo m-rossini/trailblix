@@ -38,7 +38,8 @@ const CareerPath: React.FC = () => {
 
         const formData = new FormData();
         formData.append('cvFile', cvFile);
-        formData.append('username', username); // Append the username
+        formData.append('username', username); 
+        formData.append('stage', 'current');
 
         fetch('http://localhost:5001/api/upload-cv', {
             method: 'POST',

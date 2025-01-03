@@ -20,11 +20,13 @@ def __ensure_dir_exists(path):
             logger.error(f"Failed to create directory {path}: {e}")
             raise
 
-def upload(username, cv_file):
+def upload(username, stage, cv_file):
     if cv_file and username:
         sec_filename = secure_filename(cv_file.filename)
         sec_username = secure_filename(username)
-        upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], sec_username)
+        sec_stage = secure_filename(stage)
+
+        upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], sec_username, sec_stage)
         logger.info(f">>>Upload folder: {upload_folder}")
         __ensure_dir_exists(upload_folder)
         save_path = os.path.join(upload_folder, sec_filename)
