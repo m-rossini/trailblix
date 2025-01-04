@@ -1,7 +1,11 @@
 import os  
+import logging
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename  
 from service.service_file import upload as s_upload
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 fm_bp = Blueprint('upload', __name__)
 
@@ -9,9 +13,10 @@ fm_bp = Blueprint('upload', __name__)
 def upload():
     cv_file = request.files.get('cvFile')
     username = request.form.get('username')
+    stage = request.form.get('stage')
 
     if cv_file:
-        msg, code, to_return = s_upload(username, cv_file)
+        msg, code, to_return = s_upload(username, stage, cv_file)
         response = {
             'message': msg,
             'data': to_return
