@@ -120,6 +120,12 @@ const CareerPath: React.FC = () => {
         future: null,
     });
 
+    // State to manage success messages
+    const [uploadMessages, setUploadMessages] = useState<{ [key: string]: string }>({
+        current: '',
+        future: '',
+    });
+
     useEffect(() => {
         if (!isLoggedIn) {
             navigate('/login');
@@ -168,9 +174,17 @@ const CareerPath: React.FC = () => {
             })
             .then(data => {
                 console.info(`${capitalize(stage)} CV upload successful:`, data);
-                alert(`${capitalize(stage)} CV uploaded successfully!`);
+                // Replace alert with setting success message
+                setUploadMessages(prev => ({
+                    ...prev,
+                    [stage]: `${capitalize(stage)} CV uploaded successfully!`,
+                }));
                 // Optionally, reset the file input
                 setCvFiles(prev => ({ ...prev, [stage]: null }));
+                // Clear the message after 5 seconds
+                setTimeout(() => {
+                    setUploadMessages(prev => ({ ...prev, [stage]: '' }));
+                }, 5000);
             })
             .catch(error => {
                 console.error(`Error uploading ${stage} CV:`, error);
@@ -214,6 +228,9 @@ const CareerPath: React.FC = () => {
                 onUploadClick={handleUploadClick('current')}
                 stage="current"
             />
+            {uploadMessages.current && (
+                <p style={{ color: 'green', marginTop: '5px' }}>{uploadMessages.current}</p>
+            )}
 
             {/* Future CV Upload Section */}
             <h2>Upload Your Future CV</h2>
@@ -223,6 +240,9 @@ const CareerPath: React.FC = () => {
                 onUploadClick={handleUploadClick('future')}
                 stage="future"
             />
+            {uploadMessages.future && (
+                <p style={{ color: 'green', marginTop: '5px' }}>{uploadMessages.future}</p>
+            )}
         </div>
     );
 };
