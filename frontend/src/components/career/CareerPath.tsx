@@ -111,7 +111,9 @@ const UploadArea: React.FC<UploadAreaProps> = ({
 };
 
 const CareerPath: React.FC = () => {
-    const { isLoggedIn, username } = useAuth(); // Access username from AuthContext
+    const { isLoggedIn, user } = useAuth(); // Access username from AuthContext
+    const [displayName] = useState<string>(user?.displayName || '');
+
     const navigate = useNavigate();
 
     // Unified state for both current and future CV files
@@ -159,7 +161,7 @@ const CareerPath: React.FC = () => {
 
         const formData = new FormData();
         formData.append('cvFile', file);
-        formData.append('username', username);
+        formData.append('username', user?.email || '');
         formData.append('stage', stage);
 
         fetch('http://localhost:5001/api/upload-cv', {

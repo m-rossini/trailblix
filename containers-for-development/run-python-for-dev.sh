@@ -6,13 +6,14 @@ YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-# Default values
+DEFAULT_ENGINE="podman"
 DEFAULT_IMAGE_NAME="python-coding"
 DEFAULT_POD_NAME="trailblix-dev-pod"
 
 print_usage() {
     echo -e "${YELLOW}Usage: $0 [-i|--image-name <image_name>] [-p|--pod-name <pod_name>] [-c|--container-name <container_name>] [-m|--mount <mount_path>] [--remove-existing|-re] [--remove-force|-rf] [-h|--help]${NC}"
     echo -e "${YELLOW}Options:${NC}"
+    echo -e "${YELLOW}  -e, --engine <engine>         Specify the container engine (podman or docker, default: $DEFAULT_ENGINE)${NC}"
     echo -e "${YELLOW}  -i, --image-name <image_name>   Specify the image name (default: $DEFAULT_IMAGE_NAME)${NC}"
     echo -e "${YELLOW}  -p, --pod-name <pod_name>       Specify the pod name (default: $DEFAULT_POD_NAME)${NC}"
     echo -e "${YELLOW}  -c, --container-name <container_name> Specify the container name (mandatory)${NC}"
@@ -24,6 +25,10 @@ print_usage() {
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        -e|--engine)
+            ENGINE="$2"
+            shift 2
+            ;;    
         -i|--image-name)
             IMAGE_NAME="$2"
             shift 2
@@ -60,6 +65,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+ENGINE=${ENGINE:-$DEFAULT_ENGINE}
 IMAGE_NAME=${IMAGE_NAME:-$DEFAULT_IMAGE_NAME}
 POD_NAME=${POD_NAME:-$DEFAULT_POD_NAME}
 
@@ -80,5 +86,10 @@ MOUNT_PATH="${PROJECT_ROOT}/$MOUNT_PATH"
 
 echo -e "${YELLOW}Please ensure you are calling this script from the root of the module.${NC}"
 
-# Call the common script with the appropriate parameters using absolute path
-${PROJECT_ROOT}/containers-for-development/run-container-for-dev.sh --image-name "$IMAGE_NAME" --pod-name "$POD_NAME" --container-name "$CONTAINER_NAME" --mount "$MOUNT_PATH" $REMOVE_EXISTING $REMOVE_FORCE "$@"
+${PROJECT_ROOT}/containers-for-development/run-container-for-dev.sh \
+    --engine "$ENGINE" \
+    --image-name "$IMAGE_NAME" \
+    --pod-name "$POD_NAME" \
+    --container-name "$CONTAINER_NAME" \
+    --mount "$MOUNT_PATH" \
+    $REMOVE_EXISTING $REMOVE_FORCE "$@"

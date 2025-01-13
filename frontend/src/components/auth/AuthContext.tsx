@@ -1,14 +1,35 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, {
+    createContext,
+    useContext,
+    useState,
+    ReactNode,
+    useEffect,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 
-interface AuthContextType {
-    isLoggedIn: boolean;
-    username: string;
+interface User {
+    email: string;
     displayName: string;
+    birthDate: string;
+}
+
+interface AuthContextType {
+    user: User | null;
     isAuthLoading: boolean;
-    login: (username: string, password: string) => Promise<void>;
-    signup: (email: string, password: string, displayName: string, birthDate: string) => Promise<void>;
+    isLoggedIn: boolean;
+    login: (email: string, password: string) => Promise<void>;
+    signup: (
+        email: string,
+        password: string,
+        displayName: string,
+        birthDate: string
+    ) => Promise<void>;
     logout: (redirectTo?: string) => void;
+    updateUser: (updates: {
+        displayName?: string;
+        birthDate?: string;
+        password?: string;
+    }) => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -18,92 +39,133 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-    const [username, setUsername] = useState<string>('User');
-    const [displayName, setDisplayName] = useState<string>('User');
-    const [isAuthLoading] = useState<boolean>(true);
+    const [user, setUser] = useState<User | null>(null);
+    const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
     const navigate = useNavigate();
 
     useEffect(() => {
         const data = sessionStorage.getItem('userData');
         if (data) {
             try {
-                const parsedData = JSON.parse(data);
-                setIsLoggedIn(true);
-                setUsername(parsedData.username); // Replace with actual username from token validation
-                setDisplayName(parsedData.displayName); // Replace with actual display name from token validation
+                const parsedData: User = JSON.parse(data);
+                setUser(parsedData);
             } catch (error) {
-                console.error('Failed to parse auth token:', error);
+                console.error('Failed to parse auth data:', error);
             }
         }
+        setIsAuthLoading(false);
     }, []);
 
-    const login = async (username: string, password: string): Promise<void> => {
+    const login = async (email: string, password: string): Promise<void> => {
         try {
             const response = await fetch('http://localhost:5000/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ email, password }),
             });
 
             if (!response.ok) {
-                throw new Error('Invalid credentials');
+                throw new Error('Login failed');
             }
 
-            const result = await response.json();
-            const data = result.data;
-            const jsonData = JSON.stringify(data);
-            sessionStorage.setItem('userData', jsonData);
-            setIsLoggedIn(true);
-            setUsername(data.username);
-            setDisplayName(data.display_name);
+            const data: User = await response.json();
+            setUser(data);
+            sessionStorage.setItem('userData', JSON.stringify(data));
+            navigate('/');
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Error during login:', error);
             throw error;
         }
     };
 
-    const signup = async (email: string, password: string, displayName: string, birthDate: string): Promise<void> => {
+    const signup = async (
+        email: string,
+        password: string,
+        displayName: string,
+        birthDate: string
+    ): Promise<void> => {
         try {
             const response = await fetch('http://localhost:5000/api/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password, displayName, birthDate }),
+                body: JSON.stringify({
+                    email,
+                    password,
+                    displayName,
+                    birthDate,
+                }),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to sign up');
+                throw new Error('Signup failed');
             }
 
-            const result = await response.json();
-            const data = result.data;
-            localStorage.setItem('data', JSON.stringify(data));
-            setIsLoggedIn(true);
-            setUsername(data.username);
-            setDisplayName(data.display_name);
+            const data: User = await response.json();
+            setUser(data);
+            sessionStorage.setItem('userData', JSON.stringify(data));
+            navigate('/');
         } catch (error) {
-            console.error('Signup error:', error);
+            console.error('Error during signup:', error);
             throw error;
         }
     };
 
-    const logout = (redirectTo?: string): void => {
-        console.info(`Logging out. User: ${username}`);
+    const logout = (redirectTo: string = '/login'): void => {
+        setUser(null);
         sessionStorage.removeItem('userData');
-        setIsLoggedIn(false);
-        setUsername('User');
-        setDisplayName('User');
-        if (redirectTo) {
-            navigate(redirectTo);
+        navigate(redirectTo);
+    };
+
+    const updateUser = async (updates: {
+        displayName?: string;
+        birthDate?: string;
+        password?: string;
+    }): Promise<void> => {
+        if (!user) {
+            throw new Error('No user is logged in');
+        }
+
+        try {
+            const response = await fetch('http://localhost:5000/api/update-profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: user.email, // Email is the unchangeable key
+                    ...updates,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update profile');
+            }
+
+            const updatedUser: User = await response.json();
+            setUser(updatedUser);
+            sessionStorage.setItem('userData', JSON.stringify(updatedUser));
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            throw error;
         }
     };
 
+    const value: AuthContextType = {
+        user,
+        isAuthLoading,
+        isLoggedIn: !!user,
+        login,
+        signup,
+        logout,
+        updateUser,
+    };
+
     return (
-        <AuthContext.Provider value={{ isLoggedIn, username, displayName, isAuthLoading, login, signup, logout }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );
@@ -111,7 +173,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
-    if (!context) {
+    if (context === undefined) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;

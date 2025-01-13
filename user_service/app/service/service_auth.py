@@ -1,7 +1,7 @@
 import logging
 from flask import current_app
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -41,7 +41,7 @@ def register(username, password, display_name, birth_date):
         "password_hash": password_hash,
         "display_name": display_name,
         "birth_date": birth_date,
-        "insert_date": datetime.now(datetime.timezone.utc)
+        "insert_date": datetime.now(timezone.utc)
     })
     logger.info(f"User {username} registered successfully.")
     to_return_data['_id'] = str(result.inserted_id)

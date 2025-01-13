@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { Link } from 'react-router-dom';
 import './shared.css';
 
 const Header: React.FC = () => {
-    const { isLoggedIn, displayName, logout } = useAuth();
+    const { user, isLoggedIn, logout } = useAuth();
+    const [displayName] = useState<string>(user?.displayName || '');
 
     const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
