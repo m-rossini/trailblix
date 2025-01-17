@@ -14,6 +14,7 @@ def login(username, password):
     if user_data and check_password_hash(user_data["password_hash"], password):
         logger.info(f"User {username} logged in successfully.")
         user_data['_id'] = str(user_data['_id'])
+        del user_data["password_hash"]
         return "Login successful", 200, user_data
     
     logger.warning(f"Failed login attempt for username: {username}")

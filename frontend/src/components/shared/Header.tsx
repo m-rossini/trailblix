@@ -5,6 +5,9 @@ import './shared.css';
 
 const Header: React.FC = () => {
     const { user, isLoggedIn, logout } = useAuth();
+    console.log(">>>auth",useAuth());
+    console.log(">>>user:", user);
+    // console.log(">>>user.data:",user.data)
     const [displayName] = useState<string>(user?.displayName || '');
 
     const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {

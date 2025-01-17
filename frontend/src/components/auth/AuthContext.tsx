@@ -70,9 +70,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 throw new Error('Login failed');
             }
 
-            const data: User = await response.json();
-            setUser(data);
-            sessionStorage.setItem('userData', JSON.stringify(data));
+            const { data }: { data: { username: string; display_name: string; birth_date: string } } = await response.json();
+            const userData: User = {
+                email: data.username,
+                displayName: data.display_name,
+                birthDate: data.birth_date,
+            };
+            setUser(userData);
+            sessionStorage.setItem('userData', JSON.stringify(userData));
             navigate('/');
         } catch (error) {
             console.error('Error during login:', error);
