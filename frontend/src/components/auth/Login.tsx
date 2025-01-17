@@ -1,50 +1,56 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login: React.FC = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [error, setError] = useState<string>('');
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogin = async () => {
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
         try {
-            await login(username, password);
-            console.log('Login successful. Username:', username);
-            setError(null); 
-            navigate('/'); 
-        } catch (error) {
-            console.error('Login failed:', error);
-            setError('Login failed. Please check your username and password.');
+            await login(email, password);
+            navigate('/');
+        } catch (err) {
+            setError('Invalid email or password.');
         }
     };
 
     return (
-        <div>
-            <main>
-                <div>
-                    <h2>Login</h2>
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className="login-container">
+            <h2>Login</h2>
+            {error && <p className="error-message">{error}</p>}
+            <form onSubmit={handleLogin} className="login-form">
+                <div className="form-group">
+                    <label htmlFor="email">Email (Username):</label>
                     <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Enter username"
+                        type="email"
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter email"
+                        required
                     />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="password">Password:</label>
                     <input
                         type="password"
+                        id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter password"
+                        required
                     />
-                    <button onClick={handleLogin}>Login</button>
-                    <p>
-                        Don't have an account? <Link to="/signup">Sign Up</Link>
-                    </p>
                 </div>
-            </main>
+                <button type="submit">Login</button>
+            </form>
+            <p>
+                Don't have an account? <Link to="/signup">Sign Up</Link>
+            </p>
         </div>
     );
 };

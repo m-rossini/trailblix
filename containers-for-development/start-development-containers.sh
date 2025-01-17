@@ -60,22 +60,24 @@ POD_NAME_APP="trailblix-dev-pod"
 POD_NAME_DB="mongo-dev-pod"
 
 # Run the Python container with mandatory parameters
-echo -e "${YELLOW}Running Python container...${NC}"
+echo -e "${YELLOW}Running Python container user service...${NC}"
 ${PROJECT_ROOT}/containers-for-development/run-python-for-dev.sh \
   --engine podman \
   --image-name python-coding \
   --container-name python-coding-container-user-service \
   --pod-name $POD_NAME_APP \
+  --mount 'user_service' \
   --remove-existing \
   --remove-force
 check_exit_status "Running Python container for User Service"
 
-echo -e "${YELLOW}Running Python container...${NC}"
+echo -e "${YELLOW}Running Python container for career service...${NC}"
 ${PROJECT_ROOT}/containers-for-development/run-python-for-dev.sh \
   --engine podman \
   --image-name python-coding \
   --container-name python-coding-container-career-service \
   --pod-name $POD_NAME_APP \
+  --mount 'career_service' \
   --remove-existing \
   --remove-force
 check_exit_status "Running Python container for Career Service"

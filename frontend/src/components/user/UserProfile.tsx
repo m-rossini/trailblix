@@ -1,29 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from './AuthContext';
+import React, { useState } from 'react';
+import { useAuth } from '../auth/AuthContext';
 
-const SignUp: React.FC = () => {
-    const [email, setEmail] = useState<string>('');
-    const [displayName, setDisplayName] = useState<string>('');
+const UserProfile: React.FC = () => {
+    const { user, updateUser } = useAuth();
+    const [displayName, setDisplayName] = useState<string>(user?.displayName || '');
+    const [birthDate, setBirthDate] = useState<string>(user?.birthDate || '');
     const [password, setPassword] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState<string>('');
-    const [birthDate, setBirthDate] = useState<string>('');
     const [error, setError] = useState<string>('');
-    const { signup, logout, isLoggedIn, user } = useAuth();
-    const navigate = useNavigate();
+    const [successMessage, setSuccessMessage] = useState<string>('');
+    const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
-    useEffect(() => {
-        if (isLoggedIn && user) {
-            // If a user is already logged in, log them out to prevent multiple accounts
-            logout('/signup');
-        }
-    }, [logout, isLoggedIn, user]);
-
-    const handleSignUp = async (e: React.FormEvent) => {
+    const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Reset error message
-        setError('');
 
         // Validation
         if (password !== confirmPassword) {
@@ -56,28 +45,64 @@ const SignUp: React.FC = () => {
             return;
         }
 
+        const updates: {
+            displayName?: string;
+            birthDate?: string;
+            password?: string;
+        } = {};
+
+        if (displayName !== user?.displayName) {
+            updates.displayName = displayName;
+        }
+
+        if (birthDate !== user?.birthDate) {
+            updates.birthDate = birthDate;
+        }
+
+        if (password) {
+            updates.password = password;
+        }
+
+        if (Object.keys(updates).length === 0) {
+            setError('No changes to update.');
+            return;
+        }
+
         try {
-            await signup(email, password, displayName, birthDate);
-            navigate('/profile'); // Redirect to profile after successful signup
+            setIsUpdating(true);
+            await updateUser(updates);
+            setSuccessMessage('Profile updated successfully!');
+            setError('');
+            // Clear password fields
+            setPassword('');
+            setConfirmPassword('');
+            // Clear success message after 5 seconds
+            setTimeout(() => {
+                setSuccessMessage('');
+            }, 5000);
         } catch (err) {
-            setError('Failed to create an account. Please try again.');
+            console.error('Update failed:', err);
+            setError('Failed to update profile. Please try again.');
+        } finally {
+            setIsUpdating(false);
         }
     };
 
     return (
-        <div className="signup-container">
-            <h2>Sign Up</h2>
+        <div className="user-profile-container">
+            <h2>User Profile</h2>
             {error && <p className="error-message">{error}</p>}
-            <form onSubmit={handleSignUp} className="signup-form">
+            {successMessage && (
+                <p className="success-message">{successMessage}</p>
+            )}
+            <form onSubmit={handleUpdate} className="profile-form">
                 <div className="form-group">
                     <label htmlFor="email">Email (Username):</label>
                     <input
                         type="email"
                         id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter email"
-                        required
+                        value={user?.email || ''}
+                        disabled
                     />
                 </div>
                 <div className="form-group">
@@ -103,34 +128,31 @@ const SignUp: React.FC = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="password">Password:</label>
+                    <label htmlFor="password">New Password:</label>
                     <input
                         type="password"
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter password"
-                        required
+                        placeholder="Enter new password"
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="confirmPassword">Confirm Password:</label>
+                    <label htmlFor="confirmPassword">Confirm New Password:</label>
                     <input
                         type="password"
                         id="confirmPassword"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Confirm password"
-                        required
+                        placeholder="Confirm new password"
                     />
                 </div>
-                <button type="submit">Sign Up</button>
+                <button type="submit" disabled={isUpdating}>
+                    {isUpdating ? 'Updating...' : 'Update Profile'}
+                </button>
             </form>
-            <p>
-                Already have an account? <Link to="/login">Login</Link>
-            </p>
         </div>
     );
 };
 
-export default SignUp;
+export default UserProfile;
