@@ -78,6 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             };
             setUser(userData);
             sessionStorage.setItem('userData', JSON.stringify(userData));
+
             navigate('/');
         } catch (error) {
             console.error('Error during login:', error);
