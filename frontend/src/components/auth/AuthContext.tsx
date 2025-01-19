@@ -86,6 +86,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setIsAuthLoading(false);
 
             return userData;
+
         } catch (error) {
             setIsAuthLoading(false);
             console.error('Error during login:', error);

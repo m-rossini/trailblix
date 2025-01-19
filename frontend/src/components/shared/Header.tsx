@@ -5,7 +5,7 @@ import './shared.css';
 
 const Header: React.FC = () => {
     const { user, isLoggedIn, logout } = useAuth();
-    console.info(">>> Header: user:", user, "isLoggedIn:", isLoggedIn);
+
     const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
         logout('/');
