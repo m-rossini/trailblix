@@ -11,25 +11,26 @@ interface User {
     email: string;
     displayName: string;
     birthDate: string;
+    _id: string;
 }
 
 interface AuthContextType {
     user: User | null;
     isAuthLoading: boolean;
     isLoggedIn: boolean;
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<User>;
     signup: (
         email: string,
         password: string,
         displayName: string,
         birthDate: string
-    ) => Promise<void>;
+    ) => Promise<User>;
     logout: (redirectTo?: string) => void;
     updateUser: (updates: {
         displayName?: string;
         birthDate?: string;
         password?: string;
-    }) => Promise<void>;
+    }) => Promise<User>;
 }
 
 interface AuthProviderProps {
@@ -56,7 +57,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setIsAuthLoading(false);
     }, []);
 
-    const login = async (email: string, password: string): Promise<void> => {
+    const login = async (email: string, password: string): Promise<User> => {
+        setIsAuthLoading(true);
         try {
             const response = await fetch('http://localhost:5000/api/login', {
                 method: 'POST',
@@ -70,17 +72,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 throw new Error('Login failed');
             }
 
-            const { data }: { data: { username: string; display_name: string; birth_date: string } } = await response.json();
+            const responseData = await response.json();
+            
             const userData: User = {
-                email: data.username,
-                displayName: data.display_name,
-                birthDate: data.birth_date,
+                _id: responseData.data._id,
+                email: responseData.data.username,
+                displayName: responseData.data.display_name,
+                birthDate: responseData.data.birth_date
             };
-            setUser(userData);
-            sessionStorage.setItem('userData', JSON.stringify(userData));
 
-            navigate('/');
+            sessionStorage.setItem('userData', JSON.stringify(userData));
+            setUser(userData);
+            setIsAuthLoading(false);
+
+            return userData;
         } catch (error) {
+            setIsAuthLoading(false);
             console.error('Error during login:', error);
             throw error;
         }
@@ -91,7 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         password: string,
         displayName: string,
         birthDate: string
-    ): Promise<void> => {
+    ): Promise<User> => {
         try {
             const response = await fetch('http://localhost:5000/api/signup', {
                 method: 'POST',
@@ -110,17 +117,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 throw new Error('Signup failed');
             }
 
-            const data: User = await response.json();
-            setUser(data);
-            sessionStorage.setItem('userData', JSON.stringify(data));
-            navigate('/');
+            const userData: User = await response.json();
+            setUser(userData);
+            sessionStorage.setItem('userData', JSON.stringify(userData));
+            return userData;
         } catch (error) {
             console.error('Error during signup:', error);
             throw error;
         }
     };
 
-    const logout = (redirectTo: string = '/login'): void => {
+    const logout = (redirectTo: string = '/'): void => {
         setUser(null);
         sessionStorage.removeItem('userData');
         navigate(redirectTo);
@@ -130,7 +137,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         displayName?: string;
         birthDate?: string;
         password?: string;
-    }): Promise<void> => {
+    }): Promise<User> => {
         if (!user) {
             throw new Error('No user is logged in');
         }
@@ -142,7 +149,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email: user.email, // Email is the unchangeable key
+                    email: user.email,
                     ...updates,
                 }),
             });
@@ -154,6 +161,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const updatedUser: User = await response.json();
             setUser(updatedUser);
             sessionStorage.setItem('userData', JSON.stringify(updatedUser));
+            return updatedUser;
         } catch (error) {
             console.error('Error updating profile:', error);
             throw error;

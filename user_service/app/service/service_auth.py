@@ -47,3 +47,36 @@ def register(username, password, display_name, birth_date):
     logger.info(f"User {username} registered successfully.")
     to_return_data['_id'] = str(result.inserted_id)
     return "User registered successfully", 201, to_return_data
+
+def update_profile(username, password, display_name, birth_date):
+    db = current_app.config["db"]
+    
+    user_data = db.users.find_one({"username": username})
+    if not user_data:
+        logger.warning(f"Update failed: User {username} not found")
+        return "User not found", 404, None
+    
+    update_fields = {}
+    if display_name is not None:
+        update_fields["display_name"] = display_name
+    if birth_date is not None:
+        update_fields["birth_date"] = birth_date
+    if password is not None:
+        update_fields["password_hash"] = generate_password_hash(password)
+    
+    if not update_fields:
+        return "No changes requested", 304, None
+    
+    update_fields["updated_at"] = datetime.now(timezone.utc)
+    
+    try:
+        result = db.users.update_one(
+            {"username": username},
+            {"$set": update_fields}
+        )
+        
+        return ("No changes made", 304, None) if result.modified_count == 0 else ("Profile updated successfully", 200, update_fields)
+        
+    except Exception as e:
+        logger.error(f"Error updating profile for user {username}: {str(e)}")
+        return "Internal server error", 500, None

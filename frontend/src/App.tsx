@@ -1,13 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './components/auth/AuthContext';
 import Login from './components/auth/Login';
 import SignUp from './components/auth/SignUp';
 import CareerPath from './components/career/CareerPath';
 import Home from './components/home/Home';
 import Header from './components/shared/Header';
 import Footer from './components/shared/Footer';
-import { AuthProvider } from './components/auth/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import UserProfile from './components/user/UserProfile';
 
 const App: React.FC = () => {
   return (
@@ -23,6 +24,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <CareerPath />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
               </ProtectedRoute>
             }
           />
