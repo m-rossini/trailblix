@@ -15,7 +15,7 @@ const SignUp: React.FC = () => {
     useEffect(() => {
         if (isLoggedIn && user) {
             // If a user is already logged in, log them out to prevent multiple accounts
-            logout('/signup');
+            logout('/');
         }
     }, [logout, isLoggedIn, user]);
 
