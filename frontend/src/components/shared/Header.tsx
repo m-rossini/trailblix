@@ -22,6 +22,7 @@ const Header: React.FC = () => {
                             <li><Link to="/profile">Welcome, {user?.displayName}</Link></li>
                             <li><Link to="/" onClick={handleLogout}>Logoff</Link></li>
                             <li><Link to="/career">Career Paths</Link></li>
+                            <li><Link to="/upload-cv">Upload CV</Link></li>
                         </>
                     ) : (
                         <li><Link to="/login">Login</Link></li>

@@ -14,6 +14,7 @@ def upload():
     cv_file = request.files.get('cvFile')
     username = request.form.get('username')
     stage = request.form.get('stage')
+    logger.info('Uploading CV.user: %s, stage: %s ', username, stage)
 
     if cv_file:
         msg, code, to_return = s_upload(username, stage, cv_file)

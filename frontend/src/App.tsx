@@ -9,6 +9,7 @@ import Header from './components/shared/Header';
 import Footer from './components/shared/Footer';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import UserProfile from './components/user/UserProfile';
+import UploadCV from './components/user/UploadCV';
 
 const App: React.FC = () => {
   return (
@@ -32,6 +33,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upload-cv"
+            element={
+              <ProtectedRoute>
+                <UploadCV />
               </ProtectedRoute>
             }
           />
