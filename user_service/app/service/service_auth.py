@@ -20,7 +20,7 @@ def login(username, password):
     logger.warning(f"Failed login attempt for username: {username}")
     return "Unauthorized", 401, None
 
-def register(username, password, display_name, birth_date):
+def register(username, password, display_name, birth_date,consent_data):
     logger.info(f"Registering user: {username}")
     db = current_app.config["db"]
     user_data = db.users.find_one({"email": username})
@@ -35,6 +35,7 @@ def register(username, password, display_name, birth_date):
         "username": username,
         "display_name": display_name,
         "birth_date": birth_date,
+        "consent_data": consent_data
     }
 
     result = db.users.insert_one({
@@ -42,6 +43,7 @@ def register(username, password, display_name, birth_date):
         "password_hash": password_hash,
         "display_name": display_name,
         "birth_date": birth_date,
+        "consent_data": consent_data,
         "insert_date": datetime.now(timezone.utc)
     })
     logger.info(f"User {username} registered successfully.")

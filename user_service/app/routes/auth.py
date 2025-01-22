@@ -25,8 +25,9 @@ def register():
     password = data.get('password')
     display_name = data.get('displayName')
     birth_date = data.get('birthDate')
+    consent_data = data.get('consent_data')
     
-    msg, code, to_return = s_register(username, password, display_name, birth_date)
+    msg, code, to_return = s_register(username, password, display_name, birth_date,consent_data)
     response = {
         "message": msg,
         "data": to_return

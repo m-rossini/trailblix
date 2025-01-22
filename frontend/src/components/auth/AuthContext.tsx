@@ -23,7 +23,8 @@ interface AuthContextType {
         email: string,
         password: string,
         displayName: string,
-        birthDate: string
+        birthDate: string,
+        consent_data: boolean
     ) => Promise<User>;
     logout: (redirectTo?: string) => void;
     updateUser: (updates: {
@@ -98,7 +99,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: string,
         password: string,
         displayName: string,
-        birthDate: string
+        birthDate: string,
+        consent_data: boolean
     ): Promise<User> => {
         try {
             const response = await fetch('http://localhost:5000/api/signup', {
@@ -111,6 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     password,
                     displayName,
                     birthDate,
+                    consent_data,
                 }),
             });
 
