@@ -11,16 +11,17 @@
   "dependencies": {
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-icons": "^5.4.0",
     "react-router-dom": "^6.0.0",
-    "react-scripts": "latest",
-    "typescript": "^4.9.5"
+    "react-scripts": "latest"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/plugin-transform-private-property-in-object": "^7.21.11",
     "@types/react": "^17.0.83",
     "@types/react-dom": "^17.0.26",
-    "@types/react-router-dom": "^5.1.7"
+    "@types/react-router-dom": "^5.1.7",
+    "typescript": "^4.9.5"
   },
   "browserslist": {
     "production": [
