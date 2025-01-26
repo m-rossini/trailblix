@@ -1,0 +1,12 @@
+/* global.css */
+
+/* Remove default margin/padding and apply Montserrat globally */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+    /* Optionally set a default font-weight or color here if desired */
+  }
+  
+  /* You can add other global resets or styles below if needed */
+  
