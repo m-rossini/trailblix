@@ -5,7 +5,6 @@ import Features from './Features';
 import Benefits from './Benefits';
 import Testimonials from './Testimonials';
 import FinalCTA from './FinalCTA';
-import Footer from './Footer';
 
 const Home: React.FC = () => {
   return (
@@ -14,9 +13,7 @@ const Home: React.FC = () => {
       <Features />
       <Benefits />
       <Testimonials />
-      <FinalCTA />
-      <Footer />
-    </>
+      <FinalCTA />    </>
   );
 };
 
