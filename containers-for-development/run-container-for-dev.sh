@@ -110,6 +110,7 @@ if [ -z "$POD_NAME" ] && [ -z "$NETWORK_NAME" ]; then
 fi
 
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$(pwd)")
+CONTAINER_MOUNT_PATH='/app/'
 MOUNT_PATH="${PROJECT_ROOT}/$MOUNT_PATH"
 
 if [ -n "$REMOVE_FORCE" ]; then
@@ -143,7 +144,7 @@ if [ -n "$NETWORK_NAME" ]; then
 fi
 
 if [ -n "$MOUNT_PATH" ]; then
-    CMD="$CMD -v $MOUNT_PATH"
+    CMD="$CMD -v $MOUNT_PATH:$CONTAINER_MOUNT_PATH"
 fi
 
 CMD="$CMD $IMAGE_NAME"

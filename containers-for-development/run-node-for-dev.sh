@@ -104,7 +104,6 @@ if [ -z "$MOUNT_PATH" ]; then
 fi
 
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$(pwd)")
-MOUNT_PATH="${PROJECT_ROOT}/$MOUNT_PATH"
 
 CMD="${PROJECT_ROOT}/containers-for-development/run-container-for-dev.sh \
     --engine \"$ENGINE\" \

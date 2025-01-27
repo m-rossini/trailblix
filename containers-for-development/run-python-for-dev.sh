@@ -104,7 +104,6 @@ if [ -z "$POD_NAME" ] && [ -z "$NETWORK_NAME" ]; then
 fi
 
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$(pwd)")
-MOUNT_PATH="${PROJECT_ROOT}/$MOUNT_PATH"
 
 CMD="${PROJECT_ROOT}/containers-for-development/run-container-for-dev.sh \
     --engine \"$ENGINE\" \
@@ -143,7 +142,7 @@ if [ -n "$REMOVE_FORCE" ]; then
 fi
 
 echo -e "${LIGHT_BLUE}Starting: $CMD${NC}"
-OUTPUT=$(eval $CMD 2>&1)
+eval $CMD 2>&1
 COMMAND_EXIT_CODE=$?
 
 if [ $COMMAND_EXIT_CODE -ne 0 ]; then

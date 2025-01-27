@@ -77,9 +77,14 @@ if [ "$ENGINE" = "podman" ]; then
   POD_OPTION="--pod-name $POD_NAME_APP"
   POD_OPTION_DB="--pod-name $POD_NAME_DB"
 else
-  echo -e "${YELLOW}Creating Docker network...${NC}"
-  docker network create marcos-net || true
-  check_exit_status "Creating Docker network"
+  echo -e "${YELLOW}Checking if Docker network exists...${NC}"
+  if ! docker network ls --format '{{.Name}}' | grep -w "marcos-net" > /dev/null; then
+    echo -e "${YELLOW}Creating Docker network...${NC}"
+    docker network create marcos-net
+    check_exit_status "Creating Docker network"
+  else
+    echo -e "${GREEN}Docker network 'marcos-net' already exists.${NC}"
+  fi
   POD_OPTION="--network marcos-net"
   POD_OPTION_DB="--network marcos-net"
 fi
