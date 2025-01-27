@@ -19,7 +19,7 @@ usage() {
     echo "Build a Node.js development image with network utilities and eza"
     echo
     echo "Options:"
-    echo "  -e, --engine ENGINE       Specify the container engine (default: podman)"
+    echo "  -e, --engine ENGINE       Specify the container engine podman | docker (default: podman)"
     echo "  -i, --image-name NAME     Specify the name for the built image (default: node-dev)"
     echo "  -n, --node-args ARGS      Specify arguments for the Node.js command"
     echo "  -f, --dockerfile FILE     Specify the Dockerfile to use (default: ../Dockerfile.dev)"
@@ -69,7 +69,7 @@ build_image() {
 }
 
 # Parse arguments
-engine="podman"
+engine=""
 image_name="node-deploy-dev"
 node_args=""
 dockerfile="../Dockerfile.dev"  # Default Dockerfile path
@@ -104,7 +104,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Check if the specified engine is installed
+if [ -z "$engine" ]; then
+    echo -e "${RED}Error: --engine parameter is required.${NC}"
+    print_usage
+    exit 1
+fi
 check_engine $engine
 
 # Check if the specified Dockerfile exists
@@ -113,7 +117,10 @@ if [ ! -f "$dockerfile" ]; then
     exit 1
 fi
 
-# Build the image
-build_image $engine $image_name "$node_args" "$dockerfile"
-
-print_message $GREEN "Image build complete"
+echo -e "${YELLOW}Building the image: $image_name using $engine${NC}"
+if $engine build -t "$image_name" -f "$dockerfile" .; then
+    print_message $GREEN "Image built successfully: $image_name"
+else
+    print_message $RED "Failed to build image"
+    exit 1
+fi

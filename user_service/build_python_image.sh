@@ -6,18 +6,13 @@ YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-# Default values
-DEFAULT_ENGINE="podman"
-DEFAULT_IMAGE_NAME="python-coding"
-DEFAULT_DOCKERFILE="../Dockerfile"
 
-# Function to print usage
 print_usage() {
-  echo -e "${YELLOW}Usage: $0 [-e|--engine <engine>] [-i|--image-name <image_name>] [-f|--dockerfile <dockerfile>] [-h|--help]${NC}"
+  echo -e "${YELLOW}Usage: $0 --engine <engine> [--image-name <image_name>] [--dockerfile <dockerfile>] [-h|--help]${NC}"
   echo -e "${YELLOW}Options:${NC}"
-  echo -e "${YELLOW}  -e, --engine <engine>           Specify the container engine (podman or docker, default: podman)${NC}"
-  echo -e "${YELLOW}  -i, --image-name <image_name>   Specify the image name (default: python-coding)${NC}"
-  echo -e "${YELLOW}  -f, --dockerfile <dockerfile>   Specify the Dockerfile to use (default: ../Dockerfile)${NC}"
+  echo -e "${YELLOW}  --engine, -e <engine>           Specify the container engine (podman or docker)${NC}"
+  echo -e "${YELLOW}  --image-name, -i <image_name>   Specify the image name (default: python-coding)${NC}"
+  echo -e "${YELLOW}  --dockerfile, -f <dockerfile>   Specify the Dockerfile to use (default: ../Dockerfile)${NC}"
   echo -e "${YELLOW}  -h, --help                      Show this help message and exit${NC}"
   echo -e "${YELLOW}Examples:${NC}"
   echo -e "${YELLOW}  $0 --engine docker --image-name my-python-dev --dockerfile ../Dockerfile.custom${NC}"
@@ -63,7 +58,10 @@ build_image() {
     fi
 }
 
-# Parse arguments
+ENGINE=""
+IMAGE_NAME="python-coding"
+DOCKERFILE="../Dockerfile"
+
 while [[ $# -gt 0 ]]; do
   case $1 in
     -e|--engine)
@@ -90,13 +88,19 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Use default values if not provided
-ENGINE=${ENGINE:-$DEFAULT_ENGINE}
-IMAGE_NAME=${IMAGE_NAME:-$DEFAULT_IMAGE_NAME}
-DOCKERFILE=${DOCKERFILE:-$DEFAULT_DOCKERFILE}
+if [ -z "$ENGINE" ]; then
+    echo -e "${RED}Error: --engine parameter is required.${NC}"
+    print_usage
+    exit 1
+fi
 
 # Check if the container engine is installed
 check_engine $ENGINE
 
-# Build the image
-build_image $ENGINE $IMAGE_NAME $DOCKERFILE
+echo -e "${YELLOW}Building the image: $IMAGE_NAME using $ENGINE${NC}"
+if $ENGINE build -t "$IMAGE_NAME" -f "$DOCKERFILE" .; then
+    print_message $GREEN "Image built successfully: $IMAGE_NAME"
+else
+    print_message $RED "Failed to build image"
+    exit 1
+fi

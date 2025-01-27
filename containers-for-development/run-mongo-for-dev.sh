@@ -90,13 +90,25 @@ if [[ -z "$POD_NAME" && -z "$CONTAINER_HOSTNAME" ]]; then
   exit 1
 fi
 
-# Check if the volume exists, if not, create it
-if ! $ENGINE volume exists "$VOLUME_NAME"; then
-  echo -e "${YELLOW}Volume $VOLUME_NAME does not exist. Creating it now...${NC}"
-  $ENGINE volume create "$VOLUME_NAME"
-  echo -e "${GREEN}Volume $VOLUME_NAME created successfully.${NC}"
+if [ "$ENGINE" = "podman" ]; then
+  if ! $ENGINE volume exists "$VOLUME_NAME"; then
+    echo -e "${YELLOW}Volume $VOLUME_NAME does not exist for podman. Creating it now...${NC}"
+    $ENGINE volume create "$VOLUME_NAME"
+    echo -e "${GREEN}Volume $VOLUME_NAME created successfully.${NC}"
+  else
+    echo -e "${GREEN}Volume $VOLUME_NAME already exists.${NC}"
+  fi
+elif [ "$ENGINE" = "docker" ]; then
+  if ! $ENGINE volume ls -q | grep -w "$VOLUME_NAME" > /dev/null; then
+    echo -e "${YELLOW}Volume $VOLUME_NAME does not exist for docker. Creating it now...${NC}"
+    $ENGINE volume create "$VOLUME_NAME"
+    echo -e "${GREEN}Volume $VOLUME_NAME created successfully.${NC}"
+  else
+    echo -e "${GREEN}Volume $VOLUME_NAME already exists.${NC}"
+  fi
 else
-  echo -e "${GREEN}Volume $VOLUME_NAME already exists.${NC}"
+  echo -e "${RED}Unsupported engine: $ENGINE. Supported engines are podman and docker.${NC}"
+  exit 1
 fi
 
 CONTAINER_EXISTS=$($ENGINE ps -a --format "{{.Names}}" | grep -w "mongo-for-dev" || true)
@@ -138,5 +150,11 @@ echo -e "${YELLOW}Running command: $COMMAND${NC}"
 
 # Execute the command
 eval $COMMAND
+COMMAND_EXIT_CODE=$?
 
-echo -e "${GREEN}MongoDB container started successfully.${NC}"
+if [ $COMMAND_EXIT_CODE -ne 0 ]; then
+    echo -e "${RED}Failed to start MongoDB container.${NC}"
+    exit $COMMAND_EXIT_CODE
+else
+    echo -e "${GREEN}MongoDB container started successfully. OK${NC}"
+fi
