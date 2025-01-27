@@ -6,6 +6,17 @@ YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
+print_usage() {
+    echo "Usage: $0 --engine <engine> --image-name <image_name> --dockerfile <dockerfile>"
+    echo "Build a MongoDB development image"
+    echo
+    echo "Options:"
+    echo "  --engine, -e       Specify the container engine (podman or docker)"
+    echo "  --image-name, -i   Specify the image name"
+    echo "  --dockerfile, -f   Specify the Dockerfile to use"
+    echo "  -h, --help         Show this help message and exit"
+}
+
 # Function to print colored messages
 print_message() {
     local color=$1
@@ -28,12 +39,11 @@ build_image() {
     local image_name=$2
     local dockerfile=$3
 
-    print_message $YELLOW "Using Dockerfile: $dockerfile"
-
-    print_message $YELLOW "Building image: $image_name"
+    print_message $YELLOW "Using Dockerfile: $dockerfile and build image: $image_name" $NC
     
     if $engine build -t "$image_name" -f "$dockerfile" .; then
         print_message $GREEN "Image built successfully: $image_name"
+        exit 0
     else
         print_message $RED "Failed to build image"
         exit 1
@@ -41,7 +51,7 @@ build_image() {
 }
 
 # Parse arguments
-engine="podman"
+engine=""
 image_name="mongo-dev"
 dockerfile="Dockerfile.mongo-for-dev"
 
@@ -60,14 +70,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -h|--help)
-            echo "Usage: $0 [OPTIONS]"
-            echo "Build a MongoDB development image"
-            echo
-            echo "Options:"
-            echo "  -e, --engine ENGINE       Specify the container engine (default: podman)"
-            echo "  -i, --image-name NAME     Specify the name for the built image (default: mongo-dev)"
-            echo "  -f, --dockerfile FILE     Specify the Dockerfile to use (default: Dockerfile.mongo-for-dev)"
-            echo "  -h, --help                Display this help message"
+            print_usage
             exit 0
             ;;
         *)
@@ -77,8 +80,20 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Check if the container engine is installed
+if [ -z "$engine" ]; then
+    echo -e "${RED}Error: --engine parameter is required.${NC}"
+    print_usage
+    exit 1
+fi 
+
 check_engine $engine
 
 # Build the image
 build_image $engine $image_name $dockerfile
+BUILD_EXIT_CODE=$?
+if [ $BUILD_EXIT_CODE -ne 0 ]; then
+    echo -e "${RED}Failed to build the image: $image_name.${NC}"
+    exit $BUILD_EXIT_CODE
+else
+    echo -e "${GREEN}Image $image_name built successfully.${NC}"
+fi
