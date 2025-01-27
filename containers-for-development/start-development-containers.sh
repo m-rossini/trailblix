@@ -117,7 +117,7 @@ RUN_NODE_CONTAINER_CMD="${PROJECT_ROOT}/containers-for-development/run-node-for-
   --engine \"$ENGINE\" \
   --image-name node-coding \
   --container-name 'node-coding-container' \
-  --mount 'front_end' \
+  --mount 'frontend' \
   $POD_OPTION  \
   --remove-existing \
   --remove-force"
