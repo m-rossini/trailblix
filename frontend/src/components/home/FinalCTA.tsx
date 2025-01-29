@@ -1,93 +1,73 @@
-// FinalCTA.tsx
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import brandColors from '../../styles/brandcolors'; // Adjust the path as needed
 
-import React, { useEffect, useState, CSSProperties } from 'react';
-import brandColors from '../../styles/brandcolors';
+// Styles
+const finalCTAStyles: React.CSSProperties = {
+  background: `linear-gradient(120deg, ${brandColors.gradientStart}, ${brandColors.gradientEnd})`,
+  padding: '4rem 2rem',
+  textAlign: 'center' as const,
+  color: '#fff',
+  borderRadius: '12px',
+  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+};
 
-interface StyleMap {
-  [key: string]: CSSProperties;
-}
+const titleStyle: React.CSSProperties = {
+  fontSize: '2.5rem',
+  fontWeight: 700,
+  marginBottom: '1rem',
+};
 
-const finalCTAStyles: StyleMap = {
-  section: {
-    backgroundColor: brandColors.background,
-    textAlign: 'center' as const,
-    padding: '2.5rem 1.5rem',
-    position: 'relative' as const,
-    overflow: 'hidden',
-    // fade in container
-    opacity: 0,
-    transform: 'translateY(20px)',
-    transition: 'opacity 0.8s ease, transform 0.8s ease'
-  },
-  sectionVisible: {
-    opacity: 1,
-    transform: 'translateY(0)'
-  },
-  title: {
-    fontSize: '2rem',
-    color: brandColors.primary,
-    fontWeight: 700,
-    margin: '0 0 0.5rem 0'
-  },
-  subtitle: {
-    fontSize: '1rem',
-    color: brandColors.textMedium,
-    marginBottom: '1.5rem'
-  },
-  button: {
-    backgroundColor: brandColors.primary,
-    color: '#fff',
-    border: 'none',
-    padding: '1rem 2rem',
-    cursor: 'pointer',
-    fontSize: '1.1rem',
-    borderRadius: '6px',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    boxShadow: '0 3px 6px rgba(0,0,0,0.15)'
-  },
-  buttonHover: {
-    transform: 'scale(1.05)',
-    boxShadow: `0 8px 20px rgba(0,0,0,0.15)`
-  }
+const subtitleStyle: React.CSSProperties = {
+  fontSize: '1.2rem',
+  marginBottom: '2rem',
+  lineHeight: '1.5',
+  maxWidth: '600px',
+  margin: '0 auto',
+};
+
+const ctaButtonStyle: React.CSSProperties = {
+  backgroundColor: '#fff',
+  color: brandColors.primary,
+  padding: '0.75rem 1.5rem',
+  borderRadius: '30px',
+  fontSize: '1rem',
+  fontWeight: 600,
+  border: '2px solid #fff',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  textDecoration: 'none',
+  boxShadow: '0 3px 6px rgba(0, 0, 0, 0.1)',
+};
+
+const ctaButtonHoverStyle: React.CSSProperties = {
+  backgroundColor: brandColors.primary,
+  color: '#fff',
+  borderColor: '#fff',
+  transform: 'scale(1.05)',
+  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
 };
 
 const FinalCTA: React.FC = () => {
-  const [visible, setVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  useEffect(() => {
-    // fade in after mount
-    const timer = setTimeout(() => {
-      setVisible(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const buttonStyle: CSSProperties = {
-    ...finalCTAStyles.button,
-    ...(isHovered ? finalCTAStyles.buttonHover : {})
-  };
-
   return (
-    <section
-      style={{
-        ...finalCTAStyles.section,
-        ...(visible ? finalCTAStyles.sectionVisible : {})
-      }}
-    >
-      <h2 style={finalCTAStyles.title}>
-        Ready to Launch Your Next Career Chapter?
-      </h2>
-      <p style={finalCTAStyles.subtitle}>
-        Join thousands of professionals accelerating their growth with AI.
+    <section style={finalCTAStyles}>
+      <h2 style={titleStyle}>Ready to Launch Your Next Career Chapter?</h2>
+      <p style={subtitleStyle}>
+        Join thousands of professionals accelerating their growth with AI-powered tools and insights.
       </p>
-      <button
-        style={buttonStyle}
+      <Link
+        to="/get-started"
+        style={{
+          ...ctaButtonStyle,
+          ...(isHovered ? ctaButtonHoverStyle : {}),
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        Start Now — It’s Free
-      </button>
+        Get Started
+      </Link>
     </section>
   );
 };
