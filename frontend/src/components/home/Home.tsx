@@ -1,12 +1,20 @@
+// Home.tsx
 import React from 'react';
+import Hero from './Hero';
+import Features from './Features';
+import Benefits from './Benefits';
+import Testimonials from './Testimonials';
+import FinalCTA from './FinalCTA';
 
 const Home: React.FC = () => {
-    return (
-        <div>
-            <h1>Welcome to the Home Page</h1>
-            <p>This is the home page of the application.</p>
-        </div>
-    );
+  return (
+    <>
+      <Hero />
+      <Features />
+      <Benefits />
+      <Testimonials />
+      <FinalCTA />    </>
+  );
 };
 
 export default Home;
