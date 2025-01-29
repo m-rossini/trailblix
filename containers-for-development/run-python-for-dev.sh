@@ -4,20 +4,18 @@
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
+LIGHT_BLUE='\033[1;34m'
 NC='\033[0m' # No Color
 
-DEFAULT_ENGINE="podman"
-DEFAULT_IMAGE_NAME="python-coding"
-DEFAULT_POD_NAME="trailblix-dev-pod"
-
 print_usage() {
-    echo -e "${YELLOW}Usage: $0 [-i|--image-name <image_name>] [-p|--pod-name <pod_name>] [-c|--container-name <container_name>] [-m|--mount <mount_path>] [--remove-existing|-re] [--remove-force|-rf] [-h|--help]${NC}"
+    echo -e "${YELLOW}Usage: $0 [-e|--engine <engine>] [-i|--image-name <image_name>] [-p|--pod-name <pod_name>] [-c|--container-name <container_name>] [-m|--mount <mount_path>] [--network <network_name>] [--remove-existing|-re] [--remove-force|-rf] [-h|--help]${NC}"
     echo -e "${YELLOW}Options:${NC}"
-    echo -e "${YELLOW}  -e, --engine <engine>         Specify the container engine (podman or docker, default: $DEFAULT_ENGINE)${NC}"
-    echo -e "${YELLOW}  -i, --image-name <image_name>   Specify the image name (default: $DEFAULT_IMAGE_NAME)${NC}"
-    echo -e "${YELLOW}  -p, --pod-name <pod_name>       Specify the pod name (default: $DEFAULT_POD_NAME)${NC}"
+    echo -e "${YELLOW}  -e, --engine <engine>           Specify the container engine (podman or docker)${NC}"
+    echo -e "${YELLOW}  -i, --image-name <image_name>   Specify the image name${NC}"
+    echo -e "${YELLOW}  -p, --pod-name <pod_name>       Specify the pod name${NC}"
     echo -e "${YELLOW}  -c, --container-name <container_name> Specify the container name (mandatory)${NC}"
     echo -e "${YELLOW}  -m, --mount <mount_path>        Specify the mount path${NC}"
+    echo -e "${YELLOW}  --network <network_name>        Specify the network name${NC}"
     echo -e "${YELLOW}  --remove-existing, -re          Remove existing container if it exists${NC}"
     echo -e "${YELLOW}  --remove-force, -rf             Force remove running container if it exists${NC}"
     echo -e "${YELLOW}  -h, --help                      Show this help message and exit${NC}"
@@ -37,6 +35,10 @@ while [[ $# -gt 0 ]]; do
             POD_NAME="$2"
             shift 2
             ;;
+        -n|--network)
+            NETWORK_NAME="$2"
+            shift 2
+            ;;            
         -c|--container-name)
             CONTAINER_NAME="$2"
             shift 2
@@ -65,9 +67,17 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-ENGINE=${ENGINE:-$DEFAULT_ENGINE}
-IMAGE_NAME=${IMAGE_NAME:-$DEFAULT_IMAGE_NAME}
-POD_NAME=${POD_NAME:-$DEFAULT_POD_NAME}
+if [ -z "$ENGINE" ]; then
+    echo -e "${RED}Error: --engine parameter is required.${NC}"
+    print_usage
+    exit 1
+fi
+
+if [ -z "$IMAGE_NAME" ]; then
+    echo -e "${RED}Error: --image-name parameter is required.${NC}"
+    print_usage
+    exit 1
+fi
 
 if [ -z "$CONTAINER_NAME" ]; then
     echo -e "${RED}Error: Container name is required.${NC}"
@@ -81,15 +91,64 @@ if [ -z "$MOUNT_PATH" ]; then
     exit 1
 fi
 
+if [ -n "$POD_NAME" ] && [ -n "$NETWORK_NAME" ]; then
+    echo -e "${RED}Error: --pod-name and --network are incompatible. Please specify only one.${NC}"
+    print_usage
+    exit 1
+fi
+
+if [ -z "$POD_NAME" ] && [ -z "$NETWORK_NAME" ]; then
+    echo -e "${RED}Error: Either --pod-name or --network must be specified.${NC}"
+    print_usage
+    exit 1
+fi
+
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$(pwd)")
-MOUNT_PATH="${PROJECT_ROOT}/$MOUNT_PATH"
 
-echo -e "${YELLOW}Please ensure you are calling this script from the root of the module.${NC}"
+CMD="${PROJECT_ROOT}/containers-for-development/run-container-for-dev.sh \
+    --engine \"$ENGINE\" \
+    --image-name \"$IMAGE_NAME\" \
+    --container-name \"$CONTAINER_NAME\" \
+    --mount \"$MOUNT_PATH\""
 
-${PROJECT_ROOT}/containers-for-development/run-container-for-dev.sh \
-    --engine "$ENGINE" \
-    --image-name "$IMAGE_NAME" \
-    --pod-name "$POD_NAME" \
-    --container-name "$CONTAINER_NAME" \
-    --mount "$MOUNT_PATH" \
-    $REMOVE_EXISTING $REMOVE_FORCE "$@"
+if [ "$ENGINE" = "podman" ]; then
+    if [ -n "$POD_NAME" ]; then
+        CMD="$CMD --pod-name \"$POD_NAME\""
+    else
+        echo -e "${RED}Error: --pod-name is required for podman.${NC}"
+        print_usage
+        exit 1
+    fi
+elif [ "$ENGINE" = "docker" ]; then
+    if [ -n "$NETWORK_NAME" ]; then
+        CMD="$CMD --network \"$NETWORK_NAME\""
+    else
+        echo -e "${RED}Error: --network is required for docker.${NC}"
+        print_usage
+        exit 1
+    fi
+else
+    echo -e "${RED}Error: Unsupported engine: $ENGINE. Supported engines are podman and docker.${NC}"
+    print_usage
+    exit 1
+fi
+
+if [ -n "$REMOVE_EXISTING" ]; then
+    CMD="$CMD $REMOVE_EXISTING"
+fi
+
+if [ -n "$REMOVE_FORCE" ]; then
+    CMD="$CMD $REMOVE_FORCE"
+fi
+
+echo -e "${LIGHT_BLUE}Starting: $CMD${NC}"
+eval $CMD 2>&1
+COMMAND_EXIT_CODE=$?
+
+if [ $COMMAND_EXIT_CODE -ne 0 ]; then
+    echo -e "${RED}Failed to start Python container: $CONTAINER_NAME.${NC}"
+    echo -e "${RED}Error details: $OUTPUT${NC}"
+    exit $COMMAND_EXIT_CODE
+else
+    echo -e "${GREEN}Python container $CONTAINER_NAME started successfully.${NC}"
+fi
