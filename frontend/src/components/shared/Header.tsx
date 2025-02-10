@@ -18,7 +18,6 @@ const Header: React.FC = () => {
             <h1 className="header-title">TrailBlix</h1>
             <nav>
                 <ul className="common-links">
-                    <li><Link to="/">Home</Link></li>
                     {isLoggedIn ? (
                         <>
                             <li><Link to="/profile">Welcome, {displayName}</Link></li>
