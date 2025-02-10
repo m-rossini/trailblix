@@ -8,10 +8,12 @@ import React, {
 import { useNavigate } from 'react-router-dom';
 
 interface User {
+    _id: string;
     email: string;
     displayName: string;
     birthDate: string;
-    _id: string;
+    consent_data: boolean;
+    marketing_consent_data: boolean;
 }
 
 interface AuthContextType {
@@ -24,13 +26,16 @@ interface AuthContextType {
         password: string,
         displayName: string,
         birthDate: string,
-        consent_data: boolean
+        consent_data: boolean,
+        marketing_consent_data: boolean
     ) => Promise<User>;
     logout: (redirectTo?: string) => void;
     updateUser: (updates: {
         displayName?: string;
         birthDate?: string;
         password?: string;
+        consent_data?: boolean;
+        marketing_consent_data?: boolean;
     }) => Promise<User>;
 }
 
@@ -74,12 +79,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
 
             const responseData = await response.json();
-            
+
             const userData: User = {
                 _id: responseData.data._id,
                 email: responseData.data.username,
                 displayName: responseData.data.display_name,
-                birthDate: responseData.data.birth_date
+                birthDate: responseData.data.birth_date,
+                consent_data: responseData.data.consent_data,
+                marketing_consent_data: responseData.data.marketing_consent_data
             };
 
             sessionStorage.setItem('userData', JSON.stringify(userData));
@@ -100,7 +107,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         password: string,
         displayName: string,
         birthDate: string,
-        consent_data: boolean
+        consent_data: boolean,
+        marketing_consent_data: boolean
     ): Promise<User> => {
         try {
             const response = await fetch('http://localhost:5000/api/signup', {
@@ -114,6 +122,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     displayName,
                     birthDate,
                     consent_data,
+                    marketing_consent_data
                 }),
             });
 
@@ -141,11 +150,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         displayName?: string;
         birthDate?: string;
         password?: string;
+        consent_data?: boolean;
+        marketing_consent_data?: boolean;
     }): Promise<User> => {
         if (!user) {
             throw new Error('No user is logged in');
         }
-
         try {
             const response = await fetch('http://localhost:5000/api/update-profile', {
                 method: 'PUT',
@@ -162,10 +172,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 throw new Error('Failed to update profile');
             }
 
-            const updatedUser: User = await response.json();
+            const serverResponse = await response.json();
+            const usableResponse = serverResponse.data;
+            const updatedUser: User = {
+                ...user,
+                displayName: usableResponse.display_name ?? user.displayName,
+                birthDate: usableResponse.birth_date ?? user.birthDate,
+                consent_data: usableResponse.consent_data ?? user.consent_data,
+                marketing_consent_data: usableResponse.marketing_consent_data ?? user.marketing_consent_data,
+            };
             setUser(updatedUser);
             sessionStorage.setItem('userData', JSON.stringify(updatedUser));
             return updatedUser;
+
         } catch (error) {
             console.error('Error updating profile:', error);
             throw error;

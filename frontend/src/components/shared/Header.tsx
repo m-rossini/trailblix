@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { Link } from 'react-router-dom';
 import './shared.css';
 
 const Header: React.FC = () => {
     const { user, isLoggedIn, logout } = useAuth();
+
+    const displayName = useMemo(() => user?.displayName, [user?.displayName]);
 
     const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
@@ -19,7 +21,7 @@ const Header: React.FC = () => {
                     <li><Link to="/">Home</Link></li>
                     {isLoggedIn ? (
                         <>
-                            <li><Link to="/profile">Welcome, {user?.displayName}</Link></li>
+                            <li><Link to="/profile">Welcome, {displayName}</Link></li>
                             <li><Link to="/" onClick={handleLogout}>Logoff</Link></li>
                             <li><Link to="/career">Career Paths</Link></li>
                             <li><Link to="/upload-cv">Upload CV</Link></li>
@@ -33,4 +35,6 @@ const Header: React.FC = () => {
     );
 };
 
-export default React.memo(Header);
+export default React.memo(Header, (prevProps, nextProps) => {
+    return true;
+});

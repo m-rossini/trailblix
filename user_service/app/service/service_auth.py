@@ -20,7 +20,7 @@ def login(username, password):
     logger.warning(f"Failed login attempt for username: {username}")
     return "Unauthorized", 401, None
 
-def register(username, password, display_name, birth_date,consent_data):
+def register(username, password, display_name, birth_date,consent_data=False,marketing_consent_data=False):
     logger.info(f"Registering user: {username}")
     db = current_app.config["db"]
     user_data = db.users.find_one({"email": username})
@@ -31,26 +31,25 @@ def register(username, password, display_name, birth_date,consent_data):
 
     password_hash = generate_password_hash(password)
 
-    to_return_data = {
-        "username": username,
-        "display_name": display_name,
-        "birth_date": birth_date,
-        "consent_data": consent_data
-    }
-
-    result = db.users.insert_one({
+    user_data = {
         "username": username,
         "password_hash": password_hash,
         "display_name": display_name,
         "birth_date": birth_date,
         "consent_data": consent_data,
+        "marketing_consent_data": marketing_consent_data,
         "insert_date": datetime.now(timezone.utc)
-    })
-    logger.info(f"User {username} registered successfully.")
-    to_return_data['_id'] = str(result.inserted_id)
-    return "User registered successfully", 201, to_return_data
+    }
 
-def update_profile(username, password, display_name, birth_date):
+    result = db.users.insert_one(user_data)
+    user_data['_id'] = str(result.inserted_id)
+    del user_data["password_hash"]
+    del user_data["insert_date"]
+
+    logger.info(f"User {username} registered successfully.")
+    return "User registered successfully", 201, user_data
+
+def update_profile(username, password, display_name, birth_date,consent_data=False,marketing_consent_data=False):
     db = current_app.config["db"]
     
     user_data = db.users.find_one({"username": username})
@@ -64,13 +63,16 @@ def update_profile(username, password, display_name, birth_date):
     if birth_date is not None:
         update_fields["birth_date"] = birth_date
     if password is not None:
-        update_fields["password_hash"] = generate_password_hash(password)
-    
+        update_fields["password_hash"] = generate_password_hash(password)    
+    if consent_data is not None:
+        update_fields["consent_data"] = consent_data
+    if marketing_consent_data is not None:
+        update_fields["marketing_consent_data"] = marketing_consent_data
+
     if not update_fields:
         return "No changes requested", 304, None
     
     update_fields["updated_at"] = datetime.now(timezone.utc)
-    
     try:
         result = db.users.update_one(
             {"username": username},

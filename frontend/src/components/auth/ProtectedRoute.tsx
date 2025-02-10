@@ -16,7 +16,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         parsedUserData = {};
     }
 
-    console.info("Parsed user data:", parsedUserData);
     if (!parsedUserData._id) {
         return <Navigate to="/login" />;
     }

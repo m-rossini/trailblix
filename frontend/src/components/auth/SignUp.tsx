@@ -8,6 +8,7 @@ interface SignUpData {
     displayName: string;
     birthDate: string;
     consent: boolean;
+    marketingConsent: boolean;
 }
 
 const SignUp: React.FC = () => {
@@ -18,6 +19,7 @@ const SignUp: React.FC = () => {
     const [birthDate, setBirthDate] = useState<string>('');
     const [error, setError] = useState<string>('');
     const [consent_data, setConsentData] = useState<boolean>(false);
+    const [marketingConsent, setMarketingConsent] = useState<boolean>(false);
     const { signup, logout, isLoggedIn, user } = useAuth();
     const navigate = useNavigate();
 
@@ -72,7 +74,7 @@ const SignUp: React.FC = () => {
         }
 
         try {
-            await signup(email, password, displayName, birthDate, consent_data);
+            await signup(email, password, displayName, birthDate, consent_data, marketingConsent);
             navigate('/profile'); // Redirect to profile after successful signup
         } catch (err) {
             setError('Failed to create an account. Please try again.');
@@ -149,6 +151,16 @@ const SignUp: React.FC = () => {
                         />
                         I consent to the processing of my personal data for the purpose 
                         of creating and managing my account
+                    </label>
+                </div>
+                <div className="form-group">
+                    <label className="consent-label">
+                        <input
+                            type="checkbox"
+                            checked={marketingConsent}
+                            onChange={(e) => setMarketingConsent(e.target.checked)}
+                        />
+                        I agree to receive marketing information
                     </label>
                 </div>
                 <button type="submit">Sign Up</button>
