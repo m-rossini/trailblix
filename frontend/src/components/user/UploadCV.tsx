@@ -54,7 +54,7 @@ const UploadCV: React.FC = () => {
 
         const formData = new FormData();
         formData.append('cvFile', file);
-        formData.append('username', user.email);
+        formData.append('username', user._id);
         formData.append('stage', cvType);
 
         setIsUploading(true);

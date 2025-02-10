@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 
+interface UserUpdates {
+    displayName?: string;
+    birthDate?: string;
+    password?: string;
+    consent_data?: boolean;
+    marketing_consent_data?: boolean;
+}
+
 const UserProfile: React.FC = () => {
     const { user, updateUser } = useAuth();
     const [displayName, setDisplayName] = useState<string>(user?.displayName || '');
@@ -10,6 +18,8 @@ const UserProfile: React.FC = () => {
     const [error, setError] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [isUpdating, setIsUpdating] = useState<boolean>(false);
+    const [consent_data, setConsentData] = useState<boolean>(user?.consent_data || false);
+    const [marketing_consent_data, setMarketingConsent] = useState<boolean>(user?.marketing_consent_data || false);
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,11 +55,7 @@ const UserProfile: React.FC = () => {
             return;
         }
 
-        const updates: {
-            displayName?: string;
-            birthDate?: string;
-            password?: string;
-        } = {};
+        const updates: UserUpdates = {};
 
         if (displayName !== user?.displayName) {
             updates.displayName = displayName;
@@ -63,6 +69,13 @@ const UserProfile: React.FC = () => {
             updates.password = password;
         }
 
+        if (consent_data !== user?.consent_data) {
+            updates.consent_data = consent_data;
+        }
+
+        if (marketing_consent_data !== user?.marketing_consent_data) {
+            updates.marketing_consent_data = marketing_consent_data;
+        }
         if (Object.keys(updates).length === 0) {
             setError('No changes to update.');
             return;
@@ -146,6 +159,27 @@ const UserProfile: React.FC = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Confirm new password"
                     />
+                </div>
+                <div className="form-group">
+                    <label className="consent-label">
+                        <input
+                            type="checkbox"
+                            checked={consent_data}
+                            onChange={(e) => setConsentData(e.target.checked)}
+                        />
+                        I consent to the processing of my personal data
+                    </label>
+                </div>
+
+                <div className="form-group">
+                    <label className="consent-label">
+                        <input
+                            type="checkbox"
+                            checked={marketing_consent_data}
+                            onChange={(e) => setMarketingConsent(e.target.checked)}
+                        />
+                        I agree to receive marketing information
+                    </label>
                 </div>
                 <button type="submit" disabled={isUpdating}>
                     {isUpdating ? 'Updating...' : 'Update Profile'}

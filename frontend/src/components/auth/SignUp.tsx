@@ -2,6 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
+interface SignUpData {
+    email: string;
+    password: string;
+    displayName: string;
+    birthDate: string;
+    consent: boolean;
+    marketingConsent: boolean;
+}
+
 const SignUp: React.FC = () => {
     const [email, setEmail] = useState<string>('');
     const [displayName, setDisplayName] = useState<string>('');
@@ -9,6 +18,8 @@ const SignUp: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState<string>('');
     const [birthDate, setBirthDate] = useState<string>('');
     const [error, setError] = useState<string>('');
+    const [consent_data, setConsentData] = useState<boolean>(false);
+    const [marketingConsent, setMarketingConsent] = useState<boolean>(false);
     const { signup, logout, isLoggedIn, user } = useAuth();
     const navigate = useNavigate();
 
@@ -24,6 +35,12 @@ const SignUp: React.FC = () => {
 
         // Reset error message
         setError('');
+
+        // Add consent validation
+        if (!consent_data) {
+            setError('You must agree to the data processing consent');
+            return;
+        }
 
         // Validation
         if (password !== confirmPassword) {
@@ -57,7 +74,7 @@ const SignUp: React.FC = () => {
         }
 
         try {
-            await signup(email, password, displayName, birthDate);
+            await signup(email, password, displayName, birthDate, consent_data, marketingConsent);
             navigate('/profile'); // Redirect to profile after successful signup
         } catch (err) {
             setError('Failed to create an account. Please try again.');
@@ -123,6 +140,28 @@ const SignUp: React.FC = () => {
                         placeholder="Confirm password"
                         required
                     />
+                </div>
+                <div className="form-group">
+                    <label className="consent-label">
+                        <input
+                            type="checkbox"
+                            checked={consent_data}
+                            onChange={(e) => setConsentData(e.target.checked)}
+                            required
+                        />
+                        I consent to the processing of my personal data for the purpose 
+                        of creating and managing my account
+                    </label>
+                </div>
+                <div className="form-group">
+                    <label className="consent-label">
+                        <input
+                            type="checkbox"
+                            checked={marketingConsent}
+                            onChange={(e) => setMarketingConsent(e.target.checked)}
+                        />
+                        I agree to receive marketing information
+                    </label>
                 </div>
                 <button type="submit">Sign Up</button>
             </form>
