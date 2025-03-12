@@ -93,7 +93,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileInputChange}
-                    accept=".pdf,.txt,.rtf,.doc,.docx" // Accept only specific file types
+                    accept=".pdf,.txt,.rtf,.doc,.docx,text/plain" // Accept only specific file types
                     style={{ display: 'none' }} // Hidden file input
                 />
             </div>
