@@ -32,12 +32,12 @@ const UploadCV: React.FC = () => {
     };
 
     const validateAndSetFile = (file: File) => {
-        const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        const validTypes = ['application/pdf', 'application/msword', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
         setError('');
         setSuccess('');
 
         if (!validTypes.includes(file.type)) {
-            setError('Please upload a PDF or Word document');
+            setError('Please upload a PDF or Word document or text file');
             return;
         }
 
@@ -54,7 +54,7 @@ const UploadCV: React.FC = () => {
 
         const formData = new FormData();
         formData.append('cvFile', file);
-        formData.append('username', user.email);
+        formData.append('username', user._id);
         formData.append('stage', cvType);
 
         setIsUploading(true);
@@ -130,7 +130,7 @@ const UploadCV: React.FC = () => {
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileSelect}
-                    accept=".pdf,.doc,.docx"
+                    accept=".pdf,.doc,.docx, .txt"
                     style={{ display: 'none' }}
                 />
             </div>

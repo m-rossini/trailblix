@@ -153,7 +153,17 @@ const LinkStyle: CSSProperties = {
   textDecoration: 'none'
 };
 
+interface SignUpData {
+    email: string;
+    password: string;
+    displayName: string;
+    birthDate: string;
+    consent: boolean;
+    marketingConsent: boolean;
+}
+
 const SignUp: React.FC = () => {
+
   // Form states
   const [email, setEmail] = useState<string>('');
   const [displayName, setDisplayName] = useState<string>('');
