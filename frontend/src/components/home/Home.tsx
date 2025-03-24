@@ -13,7 +13,8 @@ const Home: React.FC = () => {
       <Features />
       <Benefits />
       <Testimonials />
-      <FinalCTA />    </>
+      <FinalCTA />
+    </>
   );
 };
 

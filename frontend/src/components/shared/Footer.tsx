@@ -1,106 +1,170 @@
-// Footer.tsx
-import React from 'react';
-import brandColors from '../../styles/brandcolors'; // adjust path if needed
+import React, { CSSProperties, useState } from 'react';
+import brandColors from '../../styles/brandcolors';
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
 
-const footerStyle: React.CSSProperties = {
-  backgroundColor: brandColors.primary,       // brand-colored background
+const footerStyle: CSSProperties = {
+  backgroundColor: brandColors.primary,
   color: '#fff',
-  padding: '1.5rem 1rem',
+  padding: '2rem 1rem',
   display: 'flex',
   flexDirection: 'column',
-  gap: '1rem'
+  gap: '1.5rem'
 };
 
-const topRowStyle: React.CSSProperties = {
+const columnsContainerStyle: CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
-  alignItems: 'center',
+  gap: '2rem',
   justifyContent: 'space-between',
-  gap: '1rem',
-  marginBottom: '1rem'
+  alignItems: 'flex-start'
 };
 
-const headingStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '1.2rem',
-  fontWeight: 600
-};
-
-const linksListStyle: React.CSSProperties = {
-  listStyle: 'none',
+const columnStyle: CSSProperties = {
+  flex: '1 1 200px',
   display: 'flex',
-  gap: '1rem',
+  flexDirection: 'column',
+  gap: '0.75rem'
+};
+
+const columnTitleStyle: CSSProperties = {
   margin: 0,
-  padding: 0
+  fontSize: '1.1rem',
+  fontWeight: 600,
+  marginBottom: '0.5rem'
 };
 
-const linkItemStyle: React.CSSProperties = {
-  transition: 'transform 0.3s ease',
-  fontSize: '0.95rem'
+const linksListStyle: CSSProperties = {
+  listStyle: 'none',
+  margin: 0,
+  padding: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.4rem'
 };
 
-const linkStyle: React.CSSProperties = {
+const linkItemStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  fontSize: '0.95rem',
+  transition: 'transform 0.3s ease'
+};
+
+const linkStyle: CSSProperties = {
   color: '#fff',
   textDecoration: 'none',
   transition: 'color 0.3s ease'
 };
 
-const linkHoverStyle: React.CSSProperties = {
+const linkHoverStyle: CSSProperties = {
   color: '#f0f0f0',
   textDecoration: 'underline'
 };
 
-// If you want a separate row for quick links
-const bottomRowStyle: React.CSSProperties = {
+const newsletterFormStyle: CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: '1rem'
+  gap: '0.5rem',
+  marginTop: '0.5rem'
 };
 
-const copyRightStyle: React.CSSProperties = {
-  fontSize: '0.9rem',
-  margin: 0
+const inputStyle: CSSProperties = {
+  flex: '1 1 auto',
+  padding: '0.5rem',
+  borderRadius: '4px',
+  border: 'none',
+  fontSize: '0.95rem'
 };
 
-const quickLinksListStyle: React.CSSProperties = {
-  listStyle: 'none',
+const buttonStyle: CSSProperties = {
+  backgroundColor: '#fff',
+  color: brandColors.primary,
+  border: 'none',
+  padding: '0.5rem 1rem',
+  borderRadius: '4px',
+  fontSize: '0.95rem',
+  cursor: 'pointer',
+  transition: 'background-color 0.3s ease, transform 0.3s ease'
+};
+
+const buttonHoverStyle: CSSProperties = {
+  backgroundColor: '#f0f0f0',
+  transform: 'scale(1.05)'
+};
+
+const bottomBarStyle: CSSProperties = {
   display: 'flex',
-  gap: '1rem',
-  margin: 0,
-  padding: 0
-};
-
-const quickLinkItemStyle: React.CSSProperties = {
-  fontSize: '0.9rem'
+  flexWrap: 'wrap',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  fontSize: '0.9rem',
+  borderTop: '1px solid rgba(255,255,255,0.3)',
+  paddingTop: '1rem',
+  marginTop: '1rem'
 };
 
 const Footer: React.FC = () => {
-  // Track hovered link index for a slight effect
-  const [hoveredLink, setHoveredLink] = React.useState<number | null>(null);
-  const [hoveredQuickLink, setHoveredQuickLink] = React.useState<number | null>(null);
+  // Hover states for links
+  const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
+  const [hoveredQuickLinkIndex, setHoveredQuickLinkIndex] = useState<number | null>(null);
+  // Hover state for the newsletter button
+  const [newsletterHover, setNewsletterHover] = useState(false);
 
-  const socialLinks = [
-    { name: 'Facebook', url: 'https://www.facebook.com' },
-    { name: 'Twitter', url: 'https://www.twitter.com' },
-    { name: 'Instagram', url: 'https://www.instagram.com' },
-    { name: 'LinkedIn', url: 'https://www.linkedin.com' }
+  // Quick links now reflect header links
+  const quickLinks = [
+    { name: 'Home', url: '/' },
+    { name: 'About Us', url: '/about' },
+    { name: 'Pricing', url: '/pricing' },
+    { name: 'Blog', url: '/blog' },
+    { name: 'Login', url: '/login' }
   ];
 
-  const quickLinks = [
+  const socialLinks = [
+    { name: 'Facebook', url: 'https://www.facebook.com', icon: <FaFacebookF /> },
+    { name: 'Twitter', url: 'https://www.twitter.com', icon: <FaTwitter /> },
+    { name: 'Instagram', url: 'https://www.instagram.com', icon: <FaInstagram /> },
+    { name: 'LinkedIn', url: 'https://www.linkedin.com', icon: <FaLinkedinIn /> }
+  ];
+
+  const legalLinks = [
     { name: 'Privacy Policy', url: '/privacy' },
     { name: 'Terms of Service', url: '/terms' }
   ];
 
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert('Thank you for subscribing to our newsletter!');
+  };
+
   return (
     <footer style={footerStyle}>
-      <div style={topRowStyle}>
-        <div>
-          <h2 style={headingStyle}>Follow Us</h2>
+      {/* Top Section with columns */}
+      <div style={columnsContainerStyle}>
+        {/* Column 1: Brand / About */}
+        <div style={columnStyle}>
+          <h3 style={columnTitleStyle}>TrailBlix</h3>
+          <p style={{ fontSize: '0.95rem', lineHeight: '1.5' }}>
+            At TrailBlix, we harness the power of AI to guide your career journey—providing real-time insights, personalized learning paths, and growth opportunities at every turn.
+          </p>
+          <form onSubmit={handleNewsletterSubmit} style={newsletterFormStyle}>
+            <input type="email" placeholder="Your email" required style={inputStyle} />
+            <button
+              type="submit"
+              style={{ ...buttonStyle, ...(newsletterHover ? buttonHoverStyle : {}) }}
+              onMouseEnter={() => setNewsletterHover(true)}
+              onMouseLeave={() => setNewsletterHover(false)}
+            >
+              Subscribe
+            </button>
+          </form>
+        </div>
+
+        {/* Column 2: Quick Links (header links) */}
+        <div style={columnStyle}>
+          <h3 style={columnTitleStyle}>Quick Links</h3>
           <ul style={linksListStyle}>
-            {socialLinks.map((link, index) => {
-              const isHovered = hoveredLink === index;
+            {quickLinks.map((link, index) => {
+              const isHovered = hoveredQuickLinkIndex === index;
               return (
                 <li
                   key={link.name}
@@ -108,9 +172,41 @@ const Footer: React.FC = () => {
                     ...linkItemStyle,
                     ...(isHovered ? { transform: 'scale(1.05)' } : {})
                   }}
-                  onMouseEnter={() => setHoveredLink(index)}
-                  onMouseLeave={() => setHoveredLink(null)}
+                  onMouseEnter={() => setHoveredQuickLinkIndex(index)}
+                  onMouseLeave={() => setHoveredQuickLinkIndex(null)}
                 >
+                  <a
+                    href={link.url}
+                    style={{
+                      ...linkStyle,
+                      ...(isHovered ? linkHoverStyle : {})
+                    }}
+                  >
+                    {link.name}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {/* Column 3: Follow Us */}
+        <div style={columnStyle}>
+          <h3 style={columnTitleStyle}>Follow Us</h3>
+          <ul style={linksListStyle}>
+            {socialLinks.map((link, index) => {
+              const isHovered = hoveredLinkIndex === index;
+              return (
+                <li
+                  key={link.name}
+                  style={{
+                    ...linkItemStyle,
+                    ...(isHovered ? { transform: 'scale(1.05)' } : {})
+                  }}
+                  onMouseEnter={() => setHoveredLinkIndex(index)}
+                  onMouseLeave={() => setHoveredLinkIndex(null)}
+                >
+                  {link.icon}
                   <a
                     href={link.url}
                     target="_blank"
@@ -129,35 +225,17 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      <div style={bottomRowStyle}>
-        <p style={copyRightStyle}>
-          © {new Date().getFullYear()} Trailblix. All rights reserved.
-        </p>
-        <ul style={quickLinksListStyle}>
-          {quickLinks.map((qlink, index) => {
-            const isHovered = hoveredQuickLink === index;
-            return (
-              <li
-                key={qlink.name}
-                style={{
-                  ...quickLinkItemStyle,
-                  ...(isHovered ? { textDecoration: 'underline' } : {})
-                }}
-                onMouseEnter={() => setHoveredQuickLink(index)}
-                onMouseLeave={() => setHoveredQuickLink(null)}
-              >
-                <a
-                  href={qlink.url}
-                  style={{
-                    color: '#fff',
-                    textDecoration: 'none'
-                  }}
-                >
-                  {qlink.name}
-                </a>
-              </li>
-            );
-          })}
+      {/* Bottom bar */}
+      <div style={bottomBarStyle}>
+        <div>© {new Date().getFullYear()} TrailBlix. All rights reserved.</div>
+        <ul style={{ ...linksListStyle, flexDirection: 'row', gap: '1rem' }}>
+          {legalLinks.map((l, index) => (
+            <li key={index}>
+              <a href={l.url} style={{ color: '#fff', textDecoration: 'none' }}>
+                {l.name}
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
     </footer>

@@ -1,94 +1,84 @@
-// FinalCTA.tsx
-
-import React, { useEffect, useState, CSSProperties } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import styled, { keyframes } from 'styled-components';
 import brandColors from '../../styles/brandcolors';
 
-interface StyleMap {
-  [key: string]: CSSProperties;
-}
-
-const finalCTAStyles: StyleMap = {
-  section: {
-    backgroundColor: brandColors.background,
-    textAlign: 'center' as const,
-    padding: '2.5rem 1.5rem',
-    position: 'relative' as const,
-    overflow: 'hidden',
-    // fade in container
-    opacity: 0,
-    transform: 'translateY(20px)',
-    transition: 'opacity 0.8s ease, transform 0.8s ease'
-  },
-  sectionVisible: {
-    opacity: 1,
-    transform: 'translateY(0)'
-  },
-  title: {
-    fontSize: '2rem',
-    color: brandColors.primary,
-    fontWeight: 700,
-    margin: '0 0 0.5rem 0'
-  },
-  subtitle: {
-    fontSize: '1rem',
-    color: brandColors.textMedium,
-    marginBottom: '1.5rem'
-  },
-  button: {
-    backgroundColor: brandColors.primary,
-    color: '#fff',
-    border: 'none',
-    padding: '1rem 2rem',
-    cursor: 'pointer',
-    fontSize: '1.1rem',
-    borderRadius: '6px',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    boxShadow: '0 3px 6px rgba(0,0,0,0.15)'
-  },
-  buttonHover: {
-    transform: 'scale(1.05)',
-    boxShadow: `0 8px 20px rgba(0,0,0,0.15)`
+// Pulse animation for the CTA button on hover
+const pulse = keyframes`
+  0% {
+    transform: scale(1);
   }
-};
+  50% {
+    transform: scale(1.07);
+  }
+  100% {
+    transform: scale(1);
+  }
+`;
+
+const FinalCTASection = styled.section`
+  background: #fff; /* White background */
+  padding: 4rem 2rem;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+`;
+
+const CTATitle = styled.h2`
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: ${brandColors.primary};
+`;
+
+const CTASubtitle = styled.p`
+  font-size: 1.2rem;
+  line-height: 1.5;
+  max-width: 600px;
+  margin: 0 auto;
+  color: ${brandColors.textMedium};
+`;
+
+const CTAButton = styled(Link)`
+  background-color: ${brandColors.primary};
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid ${brandColors.primary};
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    animation: ${pulse} 0.6s ease;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+`;
+
+const CTADisclaimer = styled.p`
+  font-size: 0.9rem;
+  color: ${brandColors.textMedium};
+  margin: 0;
+`;
 
 const FinalCTA: React.FC = () => {
-  const [visible, setVisible] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    // fade in after mount
-    const timer = setTimeout(() => {
-      setVisible(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const buttonStyle: CSSProperties = {
-    ...finalCTAStyles.button,
-    ...(isHovered ? finalCTAStyles.buttonHover : {})
-  };
-
   return (
-    <section
-      style={{
-        ...finalCTAStyles.section,
-        ...(visible ? finalCTAStyles.sectionVisible : {})
-      }}
-    >
-      <h2 style={finalCTAStyles.title}>
-        Ready to Launch Your Next Career Chapter?
-      </h2>
-      <p style={finalCTAStyles.subtitle}>
-        Join thousands of professionals accelerating their growth with AI.
-      </p>
-      <button
-        style={buttonStyle}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        Start Now — It’s Free
-      </button>
-    </section>
+    <FinalCTASection>
+      <CTATitle>Ready to Transform Your Career?</CTATitle>
+      <CTASubtitle>
+        Join thousands of professionals leveraging AI-powered insights to unlock their full potential. Act now and secure your future!
+      </CTASubtitle>
+      <CTAButton to="/get-started">Get Started</CTAButton>
+      <CTADisclaimer>Limited spots available – don't miss out!</CTADisclaimer>
+    </FinalCTASection>
   );
 };
 

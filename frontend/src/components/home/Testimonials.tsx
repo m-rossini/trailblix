@@ -1,205 +1,276 @@
-// Testimonials.tsx
-
-import React, { CSSProperties, useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import styled, { keyframes } from 'styled-components';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import brandColors from '../../styles/brandcolors';
-
-interface StyleMap {
-  [key: string]: CSSProperties;
-}
-
-const testimonialStyles: StyleMap = {
-  section: {
-    padding: '3rem 1.5rem',
-    textAlign: 'center' as const,
-    backgroundColor: brandColors.background,
-    position: 'relative'
-  },
-  container: {
-    maxWidth: '900px',
-    margin: '0 auto',
-    // Fade in
-    opacity: 0,
-    transform: 'translateY(20px)',
-    transition: 'opacity 0.8s ease, transform 0.8s ease'
-  },
-  containerVisible: {
-    opacity: 1,
-    transform: 'translateY(0)'
-  },
-  title: {
-    color: brandColors.primary,
-    fontSize: '2rem',
-    margin: '0 0 1rem 0',
-    fontWeight: 700
-  },
-  subtitle: {
-    color: brandColors.textMedium,
-    fontSize: '1rem',
-    marginBottom: '2rem'
-  },
-  grid: {
-    display: 'grid',
-    gap: '1.5rem',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    justifyItems: 'center',
-    alignItems: 'start'
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: '8px',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-    padding: '1.5rem',
-    textAlign: 'left' as const,
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  cardHover: {
-    transform: 'translateY(-4px)',
-    boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
-  },
-  quoteText: {
-    fontStyle: 'italic',
-    color: brandColors.textDark,
-    margin: 0,
-    marginBottom: '1rem'
-  },
-  authorInfo: {
-    marginTop: 'auto', // push name/role to bottom if quote is tall
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem'
-  },
-  avatar: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    objectFit: 'cover'
-  },
-  authorName: {
-    fontWeight: 600,
-    margin: 0
-  },
-  authorRole: {
-    fontSize: '0.9rem',
-    color: brandColors.textMedium,
-    margin: 0
-  }
-};
 
 interface Testimonial {
   quote: string;
+  detailedQuote: string;
   name: string;
   role: string;
-  avatar?: string; // optional avatar URL
+  avatar: string;
 }
 
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`;
+
+const TestimonialsSection = styled.section`
+  background: ${brandColors.background};
+  padding: 4rem 2rem;
+  text-align: center;
+  position: relative;
+`;
+
+const SectionHeader = styled.div`
+  margin-bottom: 2rem;
+  animation: ${fadeIn} 1s ease forwards;
+`;
+
+const SectionTitle = styled.h2`
+  color: ${brandColors.primary};
+  font-size: 2.6rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+`;
+
+const SectionSubtitle = styled.p`
+  color: ${brandColors.textMedium};
+  font-size: 1.2rem;
+  margin: 0;
+`;
+
+const SliderWrapper = styled.div`
+  position: relative;
+  overflow: hidden;
+  max-width: 1000px;
+  margin: 0 auto;
+  height: 300px;
+`;
+
+const SliderContainer = styled.div<{ translateX: number }>`
+  display: flex;
+  transition: transform 0.6s ease;
+  transform: translateX(${({ translateX }) => translateX}%);
+`;
+
+const Slide = styled.div`
+  flex: 0 0 100%;
+  max-width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+`;
+
+const CardContent = styled.div`
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 2rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+const QuoteText = styled.p`
+  font-style: italic;
+  color: ${brandColors.textDark};
+  font-size: 1rem;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+`;
+
+const AuthorInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const Avatar = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+`;
+
+const AuthorDetails = styled.div`
+  text-align: left;
+`;
+
+const AuthorName = styled.h4`
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0;
+  color: ${brandColors.textDark};
+`;
+
+const AuthorRole = styled.p`
+  font-size: 0.9rem;
+  color: ${brandColors.textMedium};
+  margin: 0;
+`;
+
+const NavigationButton = styled.button`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.85);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  z-index: 2;
+
+  &:hover {
+    background: rgba(255, 255, 255, 1);
+  }
+`;
+
+const PrevButton = styled(NavigationButton)`
+  left: 1rem;
+`;
+
+const NextButton = styled(NavigationButton)`
+  right: 1rem;
+`;
+
+const DotContainer = styled.div`
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+`;
+
+const Dot = styled.div<{ active: boolean }>`
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: ${({ active }) => (active ? brandColors.primary : '#ccc')};
+  transition: background 0.3s ease;
+  cursor: pointer;
+`;
+
 const Testimonials: React.FC = () => {
-  // fade-in effect
-  const [visible, setVisible] = useState(false);
-
-  // Track which card is hovered for the small lift effect
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Updated data: now 6 testimonials
   const testimonialsData: Testimonial[] = [
     {
       quote:
         '“Thanks to Trailblix, I transitioned from a junior analyst to a data scientist in under a year.”',
+      detailedQuote:
+        'Trailblix provided me with the perfect roadmap to enhance my skills and connect with the right opportunities.',
       name: 'Sarah',
       role: 'Data Scientist',
-      avatar: '/assets/avatars/avatar-sarah.jpg'
+      avatar: '/assets/avatars/avatar-sarah.jpg',
     },
     {
       quote:
         '“The personalized learning paths gave me the exact courses I needed to level up my skill set.”',
+      detailedQuote:
+        'The Trailblix AI analyzed my profile and helped me pick courses that directly boosted my skills and career trajectory.',
       name: 'Alex',
       role: 'Product Manager',
-      avatar: '/assets/avatars/avatar-alex.jpg'
-    },
-    {
-      quote:
-        '“The AI-driven career match was spot on! Trailblix saved me countless hours of searching.”',
-      name: 'Priya',
-      role: 'Business Analyst',
-      avatar: '/assets/avatars/avatar-priya.jpg'
-    },
-    {
-      quote:
-        '“Real-time job alerts meant I could apply first — and actually landed my dream role!”',
-      name: 'Michael',
-      role: 'Marketing Specialist',
-      avatar: '/assets/avatars/avatar-michael.jpg'
-    },
-    {
-      quote:
-        '“With Trailblix, I discovered an exciting field I had never considered. It completely changed my career trajectory.”',
-      name: 'John',
-      role: 'UX Researcher',
-      avatar: '/assets/avatars/avatar-john.jpg'
+      avatar: '/assets/avatars/avatar-alex.jpg',
     },
     {
       quote:
         '“Trailblix not only found me the perfect role but also mapped out a learning path that boosted my confidence and skills.”',
+      detailedQuote:
+        'With Trailblix, I gained clarity on my career path and the confidence to take on bigger challenges.',
       name: 'Lucy',
       role: 'Frontend Developer',
-      avatar: '/assets/avatars/avatar-lucy.jpg'
-    }
+      avatar: '/assets/avatars/avatar-lucy.jpg',
+    },
+    {
+      quote:
+        '“I love how Trailblix makes career planning simple and effective.”',
+      detailedQuote:
+        'The insights and recommendations are spot-on, making my career decisions much easier.',
+      name: 'Michael',
+      role: 'UX Designer',
+      avatar: '/assets/avatars/avatar-michael.jpg',
+    },
+    {
+      quote:
+        '“Trailblix’s real-time job alerts kept me ahead of the competition.”',
+      detailedQuote:
+        'I never missed an opportunity thanks to the instant notifications and customized recommendations.',
+      name: 'Emily',
+      role: 'Marketing Specialist',
+      avatar: '/assets/avatars/avatar-emily.jpg',
+    },
+    {
+      quote:
+        '“The mentorship and community features of Trailblix are game-changers.”',
+      detailedQuote:
+        'Connecting with industry experts and peers has greatly enhanced my professional growth.',
+      name: 'David',
+      role: 'Software Engineer',
+      avatar: '/assets/avatars/avatar-david.jpg',
+    },
   ];
 
-  return (
-    <section id="testimonials" style={testimonialStyles.section}>
-      <div
-        style={{
-          ...testimonialStyles.container,
-          ...(visible ? testimonialStyles.containerVisible : {})
-        }}
-      >
-        <h2 style={testimonialStyles.title}>Success Stories</h2>
-        <p style={testimonialStyles.subtitle}>
-          Hear what our users have to say about their journeys with Trailblix.
-        </p>
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const testimonialCount = testimonialsData.length;
 
-        <div style={testimonialStyles.grid}>
-          {testimonialsData.map((testimonial, index) => {
-            const isHovered = hoveredIndex === index;
-            return (
-              <div
-                key={index}
-                style={{
-                  ...testimonialStyles.card,
-                  ...(isHovered ? testimonialStyles.cardHover : {})
-                }}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
-              >
-                <p style={testimonialStyles.quoteText}>{testimonial.quote}</p>
-                <div style={testimonialStyles.authorInfo}>
-                  {testimonial.avatar && (
-                    <img
-                      src={testimonial.avatar}
-                      alt={`${testimonial.name} avatar`}
-                      style={testimonialStyles.avatar}
-                    />
-                  )}
-                  <div>
-                    <h4 style={testimonialStyles.authorName}>{testimonial.name}</h4>
-                    <p style={testimonialStyles.authorRole}>{testimonial.role}</p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % testimonialCount);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [testimonialCount]);
+
+  const goToPrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? testimonialCount - 1 : prev - 1));
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % testimonialCount);
+  };
+
+  return (
+    <TestimonialsSection id="testimonials">
+      <SectionHeader>
+        <SectionTitle>Success Stories</SectionTitle>
+        <SectionSubtitle>
+          Hear what our users have to say about their journeys with Trailblix.
+        </SectionSubtitle>
+      </SectionHeader>
+      <SliderWrapper>
+        <SliderContainer translateX={-currentIndex * 100}>
+          {testimonialsData.map((testimonial, index) => (
+            <Slide key={index}>
+              <CardContent>
+                <QuoteText>{testimonial.quote}</QuoteText>
+                <AuthorInfo>
+                  <Avatar src={testimonial.avatar} alt={`${testimonial.name} avatar`} />
+                  <AuthorDetails>
+                    <AuthorName>{testimonial.name}</AuthorName>
+                    <AuthorRole>{testimonial.role}</AuthorRole>
+                  </AuthorDetails>
+                </AuthorInfo>
+              </CardContent>
+            </Slide>
+          ))}
+        </SliderContainer>
+        <PrevButton onClick={goToPrev}>
+          <FaChevronLeft />
+        </PrevButton>
+        <NextButton onClick={goToNext}>
+          <FaChevronRight />
+        </NextButton>
+      </SliderWrapper>
+      <DotContainer>
+        {testimonialsData.map((_, index) => (
+          <Dot key={index} active={index === currentIndex} onClick={() => setCurrentIndex(index)} />
+        ))}
+      </DotContainer>
+    </TestimonialsSection>
   );
 };
 
