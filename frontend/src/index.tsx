@@ -1,16 +1,18 @@
-// index.tsx
+// src/index.tsx
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
 
-// 1) Import the global stylesheet
 import './global.css';
-
 import App from './App';
+import theme from './styles/theme';
 
 ReactDOM.render(
   <Router>
-    <App />
+    <ThemeProvider theme={theme}>
+      <App />
+    </ThemeProvider>
   </Router>,
   document.getElementById('root')
 );

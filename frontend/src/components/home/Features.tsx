@@ -1,97 +1,6 @@
-import React, { CSSProperties, useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import styled, { keyframes } from 'styled-components';
 import brandColors from '../../styles/brandcolors';
-
-interface StyleMap {
-  [key: string]: CSSProperties;
-}
-
-const featureStyles: StyleMap = {
-  section: {
-    background: brandColors.background,
-    padding: '4rem 2rem',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '3rem',
-    opacity: 0,
-    transform: 'translateY(20px)',
-    transition: 'opacity 0.8s ease, transform 0.8s ease',
-  },
-  containerVisible: {
-    opacity: 1,
-    transform: 'translateY(0)',
-  },
-  row: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2rem',
-    padding: '2rem',
-    borderRadius: '12px',
-    position: 'relative' as const,
-  },
-  rowReverse: {
-    flexDirection: 'row-reverse' as const,
-  },
-  textContainer: {
-    flex: '1 1 50%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    gap: '1rem',
-  },
-  title: {
-    fontSize: '2rem',
-    fontWeight: 700,
-    margin: '0 0 0.5rem 0',
-    color: brandColors.textDark,
-  },
-  subTitle: {
-    fontSize: '1rem',
-    lineHeight: '1.6',
-    color: brandColors.textMedium,
-    margin: 0,
-  },
-  toggleButton: {
-    color: brandColors.primary,
-    background: 'none',
-    border: 'none',
-    fontSize: '0.95rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    textDecoration: 'underline',
-    margin: 0,
-    padding: 0,
-    alignSelf: 'flex-start',
-  },
-  toggleArea: {
-    marginTop: '0.5rem',
-    transition: 'max-height 0.4s ease',
-    overflow: 'hidden',
-  },
-  bulletPoints: {
-    listStyle: 'disc',
-    paddingLeft: '1.5rem',
-    margin: '0.5rem 0 0',
-    color: brandColors.textDark,
-  },
-  imageContainer: {
-    flex: '1 1 50%',
-    display: 'flex',
-    justifyContent: 'center',
-    position: 'relative',
-    background: 'none',
-  },
-  image: {
-    width: '100%',
-    maxWidth: '350px',
-    zIndex: 1,
-    background: 'none',
-    border: 'none',
-  },
-};
 
 interface FeatureData {
   title: string;
@@ -100,126 +9,205 @@ interface FeatureData {
   extraPoints: string[];
 }
 
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const FeaturesSection = styled.section`
+  background: ${brandColors.background};
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+`;
+
+const Card = styled.div`
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+  animation: ${fadeInUp} 0.8s ease forwards;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+  }
+`;
+
+const CardImage = styled.img`
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background: #f9f9f9;
+`;
+
+const CardContent = styled.div`
+  padding: 1.5rem;
+`;
+
+const CardTitle = styled.h3`
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: ${brandColors.textDark};
+  margin: 0 0 0.5rem;
+`;
+
+const CardDescription = styled.p`
+  font-size: 1rem;
+  color: ${brandColors.textMedium};
+  margin: 0 0 1rem;
+  line-height: 1.5;
+`;
+
+const ToggleButton = styled.button`
+  background: none;
+  border: none;
+  color: ${brandColors.primary};
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  margin-bottom: 0.5rem;
+  
+  &:hover {
+    color: ${brandColors.primary};
+  }
+`;
+
+const ExtraContent = styled.div<{ expanded: boolean }>`
+  max-height: ${({ expanded }) => (expanded ? '300px' : '0')};
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+`;
+
+const BulletList = styled.ul`
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 0;
+  color: ${brandColors.textDark};
+  font-size: 0.95rem;
+  line-height: 1.4;
+`;
+
+const FeatureCard: React.FC<{ feature: FeatureData }> = ({ feature }) => {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <Card>
+      <CardImage src={feature.image} alt={feature.title} />
+      <CardContent>
+        <CardTitle>{feature.title}</CardTitle>
+        <CardDescription>{feature.description}</CardDescription>
+        <ToggleButton onClick={() => setExpanded(!expanded)}>
+          {expanded ? 'Show Less' : 'Show More'}
+        </ToggleButton>
+        <ExtraContent expanded={expanded}>
+          <BulletList>
+            {feature.extraPoints.map((point, idx) => (
+              <li key={idx}>{point}</li>
+            ))}
+          </BulletList>
+        </ExtraContent>
+      </CardContent>
+    </Card>
+  );
+};
+
 const Features: React.FC = () => {
   const [visible, setVisible] = useState(false);
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(true);
-    }, 100);
+    const timer = setTimeout(() => setVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
   const featuresData: FeatureData[] = [
     {
       title: 'AI-Driven Career Match',
-      description:
-        'Leverage cutting-edge AI to uncover job roles aligning with your unique strengths. Stay ahead of the curve with real-time analytics and data-driven insights.',
+      description: 'Discover job roles that align perfectly with your unique strengths using data-driven insights.',
       image: '/assets/feature-ai-match.svg',
       extraPoints: [
-        'Analyzes past experiences & skills',
-        'Real-time industry match updates',
+        'Analyzes your skills & experiences',
+        'Real-time industry updates',
         'Predictive analytics for future roles',
       ],
     },
     {
       title: 'Personalized Learning Paths',
-      description:
-        'Bridge skill gaps fast. Our curated roadmaps help you master new tools, techniques, and knowledge—accelerating your journey toward professional excellence.',
+      description: 'Accelerate your career with tailored learning roadmaps that bridge your skill gaps.',
       image: '/assets/feature-learning-path.svg',
       extraPoints: [
         'Adaptive course recommendations',
         'Progress tracking & milestone alerts',
-        'Peer mentorship & community support',
+        'Community mentorship & support',
       ],
     },
     {
       title: 'Real-Time Job Alerts',
-      description:
-        'Never miss an opportunity. Get instant notifications for roles matching your evolving career ambitions—always be the first to respond.',
+      description: 'Stay ahead with instant notifications for roles matching your evolving ambitions.',
       image: '/assets/feature-job-alerts.svg',
       extraPoints: [
         'Instant push notifications',
         'Customizable filters & keywords',
-        'Direct recruiter connect options',
+        'Direct recruiter connections',
       ],
     },
     {
       title: 'Career Progression Tracking',
-      description:
-        'Track milestones, celebrate successes, and adapt quickly. Maintain clarity on your trajectory and keep your momentum strong.',
+      description: 'Monitor your growth with an intuitive timeline and goal-setting tools.',
       image: '/assets/feature-progression.svg',
       extraPoints: [
         'Visual timeline of achievements',
         'Goal-setting & reflection tools',
-        'Expert feedback on improvements',
+        'Expert feedback for improvement',
+      ],
+    },
+    {
+      title: 'Community & Networking',
+      description: 'Connect with peers and experts to expand your network and uncover new opportunities.',
+      image: '/assets/feature-community.svg',
+      extraPoints: [
+        'Engage in professional discussions',
+        'Attend networking events',
+        'Collaborate on projects',
+      ],
+    },
+    {
+      title: 'Mentorship & Guidance',
+      description: 'Gain personalized mentorship from seasoned professionals to fast-track your career growth.',
+      image: '/assets/feature-mentorship.svg',
+      extraPoints: [
+        'One-on-one coaching sessions',
+        'Tailored career advice',
+        'Access to exclusive resources',
       ],
     },
   ];
 
-  const handleToggle = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
-
   return (
-    <section id="features" style={featureStyles.section}>
-      <div
-        style={{
-          ...featureStyles.container,
-          ...(visible ? featureStyles.containerVisible : {}),
-        }}
-      >
-        {featuresData.map((feature, index) => {
-          const isEven = index % 2 === 0;
-          const isOpen = openIndex === index;
-
-          return (
-            <div
-              key={index}
-              style={{
-                ...featureStyles.row,
-                ...(isEven ? {} : featureStyles.rowReverse),
-              }}
-            >
-              <div style={featureStyles.textContainer}>
-                <h2 style={featureStyles.title}>{feature.title}</h2>
-                <p style={featureStyles.subTitle}>{feature.description}</p>
-                {feature.extraPoints && (
-                  <>
-                    <button
-                      style={featureStyles.toggleButton}
-                      onClick={() => handleToggle(index)}
-                    >
-                      {isOpen ? 'Show Less' : 'Show More'}
-                    </button>
-                    <div
-                      style={{
-                        ...featureStyles.toggleArea,
-                        maxHeight: isOpen ? '200px' : '0',
-                      }}
-                    >
-                      <ul style={featureStyles.bulletPoints}>
-                        {feature.extraPoints.map((point, idx) => (
-                          <li key={idx}>{point}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </>
-                )}
-              </div>
-              <div style={featureStyles.imageContainer}>
-                <img
-                  src={feature.image}
-                  alt={feature.title}
-                  style={featureStyles.image}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
+    <FeaturesSection id="features">
+      {visible && (
+        <Grid>
+          {featuresData.map((feature, index) => (
+            <FeatureCard key={index} feature={feature} />
+          ))}
+        </Grid>
+      )}
+    </FeaturesSection>
   );
 };
 

@@ -1,121 +1,178 @@
-// Login.tsx
-
-import React, { useState, useEffect, CSSProperties } from 'react';
-import { useAuth } from './AuthContext';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import brandColors from '../../styles/brandcolors'; // or wherever your brandcolors are
+import styled, { keyframes } from 'styled-components';
+import { useAuth } from './AuthContext';
+import brandColors from '../../styles/brandcolors';
+import { FcGoogle } from 'react-icons/fc';
+import { FaLinkedinIn } from 'react-icons/fa';
 
-const containerStyle: CSSProperties = {
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  minHeight: 'calc(100vh - 60px)', // for example, minus header height
-  backgroundColor: brandColors.background,
-  opacity: 0,
-  transform: 'translateY(20px)',
-  transition: 'opacity 0.8s ease, transform 0.8s ease'
-};
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
 
-const containerVisible: CSSProperties = {
-  opacity: 1,
-  transform: 'translateY(0)'
-};
+const Container = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  background-color: ${brandColors.background};
+  animation: ${fadeIn} 0.8s ease forwards;
+`;
 
-const cardStyle: CSSProperties = {
-  backgroundColor: '#fff',
-  width: '100%',
-  maxWidth: '400px',
-  padding: '2rem',
-  borderRadius: '8px',
-  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.5rem'
-};
+const Card = styled.div`
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.15);
+  }
+`;
 
-const titleStyle: CSSProperties = {
-  color: brandColors.primary,
-  margin: 0,
-  fontSize: '1.8rem',
-  textAlign: 'center' as const,
-  fontWeight: 700
-};
+const Title = styled.h2`
+  color: ${brandColors.primary};
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+`;
 
-const errorStyle: CSSProperties = {
-  color: 'red',
-  backgroundColor: '#ffe0e0',
-  padding: '0.5rem 1rem',
-  borderRadius: '4px',
-  textAlign: 'center' as const,
-  fontSize: '0.9rem'
-};
+const ErrorMessage = styled.p`
+  color: red;
+  background-color: #ffe0e0;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9rem;
+`;
 
-const formStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1rem'
-};
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
 
-const formGroupStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.5rem'
-};
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
 
-const labelStyle: CSSProperties = {
-  fontSize: '0.9rem',
-  color: brandColors.textDark
-};
+const Label = styled.label`
+  font-size: 0.9rem;
+  color: ${brandColors.textDark};
+`;
 
-const inputStyle: CSSProperties = {
-  padding: '0.75rem',
-  border: '1px solid #ddd',
-  borderRadius: '4px',
-  fontSize: '1rem',
-  transition: 'border-color 0.2s ease'
-};
+const Input = styled.input`
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  &:focus {
+    border-color: ${brandColors.primary};
+    box-shadow: 0 0 0 2px rgba(78,70,229,0.2);
+    outline: none;
+  }
+`;
 
-const inputFocusHoverStyle: CSSProperties = {
-  borderColor: brandColors.primary
-};
+const LoginButton = styled.button`
+  background-color: ${brandColors.primary};
+  color: #fff;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  &:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  }
+`;
 
-const buttonStyle: CSSProperties = {
-  backgroundColor: brandColors.primary,
-  color: '#fff',
-  padding: '0.75rem',
-  border: 'none',
-  borderRadius: '4px',
-  fontSize: '1rem',
-  cursor: 'pointer',
-  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-  boxShadow: '0 3px 6px rgba(0,0,0,0.1)'
-};
+const Divider = styled.div`
+  text-align: center;
+  margin: 1.5rem 0;
+  position: relative;
+  color: ${brandColors.textMedium};
+  font-size: 0.9rem;
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #ddd;
+  }
+  &::before {
+    left: 0;
+  }
+  &::after {
+    right: 0;
+  }
+`;
 
-const buttonHoverStyle: CSSProperties = {
-  transform: 'scale(1.03)',
-  boxShadow: '0 6px 16px rgba(0,0,0,0.1)'
-};
+const SocialButtonsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
 
-const linkStyle: CSSProperties = {
-  color: brandColors.primary,
-  textDecoration: 'none'
-};
+const SocialButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  font-size: 1rem;
+  cursor: pointer;
+  background: transparent;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  &:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+`;
+
+const GoogleButton = styled(SocialButton)`
+  color: #444;
+`;
+
+const LinkedInButton = styled(SocialButton)`
+  color: #0077b5;
+`;
+
+const SignupLink = styled(Link)`
+  color: ${brandColors.primary};
+  text-decoration: none;
+  font-size: 0.95rem;
+  text-align: center;
+  margin-top: 1rem;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
 
 const Login: React.FC = () => {
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
-
-  // fade-in state
   const [visible, setVisible] = useState(false);
-  // hovered states
-  const [hoveredButton, setHoveredButton] = useState(false);
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(true);
-    }, 100);
+    const timer = setTimeout(() => setVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -124,7 +181,6 @@ const Login: React.FC = () => {
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
-    
     try {
       await login(email, password);
       navigate('/');
@@ -133,75 +189,34 @@ const Login: React.FC = () => {
     }
   };
 
-  const containerCombinedStyle: CSSProperties = {
-    ...containerStyle,
-    ...(visible ? containerVisible : {})
-  };
-
   return (
-    <div style={containerCombinedStyle}>
-      <div style={cardStyle}>
-        <h2 style={titleStyle}>Login</h2>
-        {error && <p style={errorStyle}>{error}</p>}
-
-        <form onSubmit={handleLogin} style={formStyle}>
-          <div style={formGroupStyle}>
-            <label htmlFor="email" style={labelStyle}>
-              Email (Username):
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Enter email"
-              required
-              style={{
-                ...inputStyle,
-                ...(focusedInput === 'email' ? inputFocusHoverStyle : {})
-              }}
-              onFocus={() => setFocusedInput('email')}
-              onBlur={() => setFocusedInput(null)}
-            />
-          </div>
-          <div style={formGroupStyle}>
-            <label htmlFor="password" style={labelStyle}>
-              Password:
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Enter password"
-              required
-              style={{
-                ...inputStyle,
-                ...(focusedInput === 'password' ? inputFocusHoverStyle : {})
-              }}
-              onFocus={() => setFocusedInput('password')}
-              onBlur={() => setFocusedInput(null)}
-            />
-          </div>
-          <button
-            type="submit"
-            style={{
-              ...buttonStyle,
-              ...(hoveredButton ? buttonHoverStyle : {})
-            }}
-            onMouseEnter={() => setHoveredButton(true)}
-            onMouseLeave={() => setHoveredButton(false)}
-          >
-            Login
-          </button>
-        </form>
-
-        <p style={{ textAlign: 'center' }}>
-          Don't have an account?{' '}
-          <Link to="/signup" style={linkStyle}>
-            Sign Up
-          </Link>
-        </p>
-      </div>
-    </div>
+    <Container style={visible ? {} : { opacity: 0 }}>
+      <Card>
+        <Title>Login to TrailBlix</Title>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        <Form onSubmit={handleLogin}>
+          <FormGroup>
+            <Label htmlFor="email">Email (Username):</Label>
+            <Input type="email" id="email" name="email" placeholder="Enter email" required />
+          </FormGroup>
+          <FormGroup>
+            <Label htmlFor="password">Password:</Label>
+            <Input type="password" id="password" name="password" placeholder="Enter password" required />
+          </FormGroup>
+          <LoginButton type="submit">Login</LoginButton>
+        </Form>
+        <Divider>or</Divider>
+        <SocialButtonsContainer>
+          <GoogleButton>
+            <FcGoogle size={24} /> Continue with Google
+          </GoogleButton>
+          <LinkedInButton>
+            <FaLinkedinIn size={20} /> Continue with LinkedIn
+          </LinkedInButton>
+        </SocialButtonsContainer>
+        <SignupLink to="/signup">Don't have an account? Sign Up</SignupLink>
+      </Card>
+    </Container>
   );
 };
 

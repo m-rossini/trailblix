@@ -1,8 +1,7 @@
 import React, { CSSProperties, useState } from 'react';
-import brandColors from '../../styles/brandcolors'; // adjust path if needed
+import brandColors from '../../styles/brandcolors';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
 
-// Outer footer style
 const footerStyle: CSSProperties = {
   backgroundColor: brandColors.primary,
   color: '#fff',
@@ -12,16 +11,14 @@ const footerStyle: CSSProperties = {
   gap: '1.5rem'
 };
 
-// Container for top columns
 const columnsContainerStyle: CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
   gap: '2rem',
   justifyContent: 'space-between',
-  alignItems: 'start'
+  alignItems: 'flex-start'
 };
 
-// Each column
 const columnStyle: CSSProperties = {
   flex: '1 1 200px',
   display: 'flex',
@@ -29,7 +26,6 @@ const columnStyle: CSSProperties = {
   gap: '0.75rem'
 };
 
-// Titles in each column
 const columnTitleStyle: CSSProperties = {
   margin: 0,
   fontSize: '1.1rem',
@@ -37,7 +33,6 @@ const columnTitleStyle: CSSProperties = {
   marginBottom: '0.5rem'
 };
 
-// Common link list style
 const linksListStyle: CSSProperties = {
   listStyle: 'none',
   margin: 0,
@@ -47,7 +42,6 @@ const linksListStyle: CSSProperties = {
   gap: '0.4rem'
 };
 
-// Link item
 const linkItemStyle: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -56,7 +50,6 @@ const linkItemStyle: CSSProperties = {
   transition: 'transform 0.3s ease'
 };
 
-// Link text style
 const linkStyle: CSSProperties = {
   color: '#fff',
   textDecoration: 'none',
@@ -68,7 +61,6 @@ const linkHoverStyle: CSSProperties = {
   textDecoration: 'underline'
 };
 
-// Newsletter styles
 const newsletterFormStyle: CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
@@ -100,7 +92,6 @@ const buttonHoverStyle: CSSProperties = {
   transform: 'scale(1.05)'
 };
 
-// The bottom bar for the final line
 const bottomBarStyle: CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
@@ -116,15 +107,16 @@ const Footer: React.FC = () => {
   // Hover states for links
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
   const [hoveredQuickLinkIndex, setHoveredQuickLinkIndex] = useState<number | null>(null);
-
   // Hover state for the newsletter button
   const [newsletterHover, setNewsletterHover] = useState(false);
 
-  // Example links
+  // Quick links now reflect header links
   const quickLinks = [
     { name: 'Home', url: '/' },
-    { name: 'Career Paths', url: '/career' },
-    { name: 'Contact Us', url: '/contact' }
+    { name: 'About Us', url: '/about' },
+    { name: 'Pricing', url: '/pricing' },
+    { name: 'Blog', url: '/blog' },
+    { name: 'Login', url: '/login' }
   ];
 
   const socialLinks = [
@@ -155,18 +147,10 @@ const Footer: React.FC = () => {
             At TrailBlix, we harness the power of AI to guide your career journey—providing real-time insights, personalized learning paths, and growth opportunities at every turn.
           </p>
           <form onSubmit={handleNewsletterSubmit} style={newsletterFormStyle}>
-            <input
-              type="email"
-              placeholder="Your email"
-              required
-              style={inputStyle}
-            />
+            <input type="email" placeholder="Your email" required style={inputStyle} />
             <button
               type="submit"
-              style={{
-                ...buttonStyle,
-                ...(newsletterHover ? buttonHoverStyle : {})
-              }}
+              style={{ ...buttonStyle, ...(newsletterHover ? buttonHoverStyle : {}) }}
               onMouseEnter={() => setNewsletterHover(true)}
               onMouseLeave={() => setNewsletterHover(false)}
             >
@@ -175,7 +159,7 @@ const Footer: React.FC = () => {
           </form>
         </div>
 
-        {/* Column 2: Quick Links */}
+        {/* Column 2: Quick Links (header links) */}
         <div style={columnStyle}>
           <h3 style={columnTitleStyle}>Quick Links</h3>
           <ul style={linksListStyle}>
@@ -247,10 +231,7 @@ const Footer: React.FC = () => {
         <ul style={{ ...linksListStyle, flexDirection: 'row', gap: '1rem' }}>
           {legalLinks.map((l, index) => (
             <li key={index}>
-              <a
-                href={l.url}
-                style={{ color: '#fff', textDecoration: 'none' }}
-              >
+              <a href={l.url} style={{ color: '#fff', textDecoration: 'none' }}>
                 {l.name}
               </a>
             </li>

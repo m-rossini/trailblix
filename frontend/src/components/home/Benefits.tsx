@@ -1,104 +1,8 @@
-// Benefits.tsx
-
-import React, { CSSProperties, useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import styled, { keyframes } from 'styled-components';
+import { FiZap, FiSearch, FiChevronDown } from 'react-icons/fi';
+import { FaRocket, FaLightbulb } from 'react-icons/fa';
 import brandColors from '../../styles/brandcolors';
-import { FiZap, FiSearch } from 'react-icons/fi';  // example Feather icons
-import { FaRocket, FaLightbulb } from 'react-icons/fa'; // example FontAwesome icons
-
-interface StyleMap {
-  [key: string]: CSSProperties;
-}
-
-const benefitsStyles: StyleMap = {
-  section: {
-    backgroundColor: brandColors.background,
-    padding: '3rem 2rem',
-    textAlign: 'center' as const,
-    position: 'relative'
-  },
-  container: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    opacity: 0,
-    transform: 'translateY(20px)',
-    transition: 'opacity 0.8s ease, transform 0.8s ease'
-  },
-  containerVisible: {
-    opacity: 1,
-    transform: 'translateY(0)'
-  },
-  title: {
-    color: brandColors.primary,
-    fontSize: '2rem',
-    fontWeight: 700,
-    marginBottom: '1rem'
-  },
-  subtitle: {
-    color: brandColors.textMedium,
-    marginBottom: '2rem',
-    fontSize: '1rem'
-  },
-  list: {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: '1.5rem'
-  },
-  listItemContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    border: `1px solid #ddd`,
-    backgroundColor: '#fff',
-    borderRadius: '8px',
-    padding: '1rem',
-    cursor: 'pointer',
-    position: 'relative',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-  },
-  hoveredItem: {
-    transform: 'scale(1.02)',
-    boxShadow: '0 6px 16px rgba(0,0,0,0.1)'
-  },
-  // We’ll do a brand gradient background behind the icon
-  iconArea: {
-    flexShrink: 0,
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    // brand gradient
-    background: `linear-gradient(135deg, ${brandColors.primary} 0%, #794cfe 100%)`,
-    color: '#fff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.2rem'
-  },
-  textArea: {
-    textAlign: 'left' as const,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.25rem'
-  },
-  itemTitle: {
-    color: brandColors.textDark,
-    fontWeight: 600,
-    margin: 0
-  },
-  hiddenDesc: {
-    fontSize: '0.9rem',
-    color: brandColors.textMedium,
-    margin: 0,
-    maxHeight: '0',
-    overflow: 'hidden',
-    transition: 'max-height 0.3s ease'
-  },
-  hiddenDescVisible: {
-    maxHeight: '200px'
-  }
-};
 
 interface Benefit {
   icon: React.ReactNode;
@@ -107,96 +11,239 @@ interface Benefit {
   longDesc: string;
 }
 
+const fadeSlideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const BenefitsSection = styled.section`
+  background: ${brandColors.background};
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+`;
+
+const BenefitsHeader = styled.div`
+  text-align: center;
+  margin-bottom: 2rem;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 2.5rem;
+  color: ${brandColors.primary};
+  margin: 0;
+  font-weight: 700;
+`;
+
+const SectionSubtitle = styled.p`
+  font-size: 1.1rem;
+  color: ${brandColors.textMedium};
+  margin: 0.5rem 0 0;
+`;
+
+// Vertical list for benefit cards
+const VerticalList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+const BenefitCard = styled.div`
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  cursor: pointer;
+  animation: ${fadeSlideIn} 0.8s ease forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const CardContent = styled.div`
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+`;
+
+const IconArea = styled.div`
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, ${brandColors.primary} 0%, #794cfe 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #fff;
+`;
+
+const TextArea = styled.div`
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const BenefitTitleText = styled.h3`
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: ${brandColors.textDark};
+`;
+
+const ShortDesc = styled.p<{ highlighted: boolean }>`
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: ${({ highlighted }) =>
+    highlighted ? brandColors.primary : brandColors.textMedium};
+  transition: color 0.3s ease;
+`;
+
+const LongDesc = styled.p<{ expanded: boolean }>`
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: ${brandColors.textDark};
+  max-height: ${({ expanded }) => (expanded ? '150px' : '0')};
+  overflow: hidden;
+  opacity: ${({ expanded }) => (expanded ? 1 : 0)};
+  transition: max-height 0.5s ease, opacity 0.5s ease;
+`;
+
+// Toggle indicator icon positioned at the bottom right of the card
+const ToggleIndicator = styled(FiChevronDown)<{ expanded: boolean }>`
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 1.2rem;
+  color: ${brandColors.primary};
+  transition: transform 0.3s ease;
+  transform: rotate(${({ expanded }) => (expanded ? '180deg' : '0deg')});
+`;
+
+const BenefitsContainer = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+const BenefitCardComponent: React.FC<{
+  benefit: Benefit;
+  index: number;
+  expanded: boolean;
+  toggle: (index: number) => void;
+}> = ({ benefit, index, expanded, toggle }) => {
+  return (
+    <BenefitCard onClick={() => toggle(index)}>
+      <CardContent>
+        <IconArea>{benefit.icon}</IconArea>
+        <TextArea>
+          <BenefitTitleText>{benefit.title}</BenefitTitleText>
+          <ShortDesc highlighted={expanded}>{benefit.shortDesc}</ShortDesc>
+          <LongDesc expanded={expanded}>{benefit.longDesc}</LongDesc>
+        </TextArea>
+        <ToggleIndicator expanded={expanded} />
+      </CardContent>
+    </BenefitCard>
+  );
+};
+
 const Benefits: React.FC = () => {
-  const [visible, setVisible] = useState(false); 
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(true);
-    }, 100);
-    return () => clearTimeout(timer);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
   }, []);
 
-  // Switch out your emojis for icons from react-icons
   const benefitsData: Benefit[] = [
     {
-      icon: <FiZap />,  // "fast" or "save time" icon
-      title: 'Save Time with Focused Recommendations',
-      shortDesc: 'Speed up your career search with AI-driven suggestions.',
+      icon: <FiZap />,
+      title: 'Save Time',
+      shortDesc: 'Quick, focused recommendations.',
       longDesc:
-        'We filter endless possibilities into curated roles and learning paths, helping you act quickly and confidently.'
+        'Our AI filters endless possibilities to deliver curated roles and learning paths so you can act quickly and confidently.',
     },
     {
-      icon: <FaLightbulb />, // "insight" icon
-      title: 'Build Confidence with AI-Powered Insights',
-      shortDesc: 'Make data-backed decisions about your future.',
+      icon: <FaLightbulb />,
+      title: 'Gain Insights',
+      shortDesc: 'Make data-backed decisions.',
       longDesc:
-        'Harness predictive analytics to see where your industry is heading and steer your career in the right direction.'
+        'Harness predictive analytics to understand industry trends and steer your career in the right direction.',
     },
     {
-      icon: <FaRocket />, // "rocket" for growth
-      title: 'Accelerate Your Growth with Tailored Paths',
-      shortDesc: 'Focus on what matters most for your development.',
+      icon: <FaRocket />,
+      title: 'Accelerate Growth',
+      shortDesc: 'Tailored paths for your development.',
       longDesc:
-        'Through skill-gap analysis and personal goal setting, get a roadmap that propels you forward faster than ever.'
+        'Get a personalized roadmap through skill-gap analysis and goal setting to fast-track your career growth.',
     },
     {
       icon: <FiSearch />,
-      title: 'Stay Ahead of the Industry Curve',
-      shortDesc: 'Never fall behind in a rapidly evolving market.',
+      title: 'Stay Updated',
+      shortDesc: 'Real-time alerts for opportunities.',
       longDesc:
-        'We monitor emerging trends and skills, giving you real-time alerts and learning materials to keep you competitive.'
-    }
+        'Receive instant notifications for roles matching your evolving ambitions so you never miss out.',
+    },
   ];
 
-  return (
-    <section id="benefits" style={benefitsStyles.section}>
-      <div
-        style={{
-          ...benefitsStyles.container,
-          ...(visible ? benefitsStyles.containerVisible : {})
-        }}
-      >
-        <h2 style={benefitsStyles.title}>Why Trailblix?</h2>
-        <p style={benefitsStyles.subtitle}>
-          Discover the advantages that set us apart from traditional career platforms.
-        </p>
-        <ul style={benefitsStyles.list}>
-          {benefitsData.map((item, index) => {
-            const isHovered = hoveredIndex === index;
-            return (
-              <li
-                key={index}
-                style={{
-                  ...benefitsStyles.listItemContainer,
-                  ...(isHovered ? benefitsStyles.hoveredItem : {})
-                }}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
-              >
-                {/* Icon with brand gradient */}
-                <div style={benefitsStyles.iconArea}>{item.icon}</div>
+  const toggleExpanded = (index: number) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
 
-                {/* Text */}
-                <div style={benefitsStyles.textArea}>
-                  <h3 style={benefitsStyles.itemTitle}>{item.title}</h3>
-                  <p style={{ margin: 0 }}>{item.shortDesc}</p>
-                  <p
-                    style={{
-                      ...benefitsStyles.hiddenDesc,
-                      ...(isHovered ? benefitsStyles.hiddenDescVisible : {})
-                    }}
-                  >
-                    {item.longDesc}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </section>
+  return (
+    <BenefitsSection id="benefits" ref={containerRef}>
+      <BenefitsHeader>
+        <SectionTitle>Benefits of TrailBlix</SectionTitle>
+        <SectionSubtitle>
+          Discover how TrailBlix empowers your career journey.
+        </SectionSubtitle>
+      </BenefitsHeader>
+      <BenefitsContainer>
+        {visible && (
+          <VerticalList>
+            {benefitsData.map((benefit, index) => (
+              <BenefitCardComponent
+                key={index}
+                benefit={benefit}
+                index={index}
+                expanded={expandedIndex === index}
+                toggle={toggleExpanded}
+              />
+            ))}
+          </VerticalList>
+        )}
+      </BenefitsContainer>
+    </BenefitsSection>
   );
 };
 

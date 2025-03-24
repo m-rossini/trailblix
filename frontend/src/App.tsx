@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './components/auth/AuthContext';
 import Login from './components/auth/Login';
 import SignUp from './components/auth/SignUp';
@@ -10,14 +10,16 @@ import Footer from './components/shared/Footer';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import UserProfile from './components/user/UserProfile';
 import UploadCV from './components/user/UploadCV';
+import About from './components/about/About'; // Import the About page
 
-const App: React.FC = () => {
+const App = () => {
   return (
     <AuthProvider>
       <Header />
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route
